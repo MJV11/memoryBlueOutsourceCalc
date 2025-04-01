@@ -21,6 +21,7 @@ const Form = () => {
     RecruitmentCostPerSDR: 7200,
     OnboardingAndTrainingCostPerSDR: 8800,
     MonthlyTurnoverRate: 30 / 12, // 30% is the bottom of the national yearly average
+    LegalandCompliance: 0,
   });
 
   // State to track form submission status
@@ -34,13 +35,13 @@ const Form = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     // Convert input to number and ensure it's valid !! Needed not just for form inputs but also for cybersecurity
-    const numericValue = parseFloat(value) || 0; 
-    
+    const numericValue = parseFloat(value) || 0;
+
     setFormData(prevData => ({
       ...prevData,
       [name]: numericValue
     }));
-    
+
     // Clear error for this field when user starts typing
     if (errors[name]) {
       setErrors(prevErrors => ({
@@ -69,59 +70,30 @@ const Form = () => {
       MonthlyInfrastructureAndFacilitiesCostPerSDR,
       RecruitmentCostPerSDR,
       OnboardingAndTrainingCostPerSDR,
-      MonthlyTurnoverRate
+      MonthlyTurnoverRate,
+      LegalandCompliance
     } = fixedData;
 
     // Calculate in-house costs
     const payrollTaxPerSDR = (YearlySalaryPerSDR + AvgYearlyCommissionsPerSDR) * (PayrollTaxRate / 100);
     const benefitsCostPerSDR = YearlySalaryPerSDR * (BenefitsRate / 100);
-    
+
     // Calculate manager cost allocation
     // This represents the cost of management spread across the SDR team
     const managerCostAllocation = (YearlySalaryPerManager / SDRsPerManager);
-    
+
     // Calculate total yearly direct cost per SDR
-    const yearlyDirectCostPerSDR = YearlySalaryPerSDR + AvgYearlyCommissionsPerSDR + 
-                                  payrollTaxPerSDR + benefitsCostPerSDR + managerCostAllocation;
-    
+    const yearlyDirectCostPerSDR = YearlySalaryPerSDR + AvgYearlyCommissionsPerSDR +
+      payrollTaxPerSDR + benefitsCostPerSDR + managerCostAllocation;
+
     // Monthly direct cost per SDR
     const monthlyDirectCostPerSDR = yearlyDirectCostPerSDR / 12;
-    
-    // Monthly operational costs
-    const monthlyOperationalCosts = MonthlyLicensesAndSalesToolsCostPerSDR + 
-                                    MonthlyInfrastructureAndFacilitiesCostPerSDR;
-    
-    // Monthly turnover costs (recruitment and training costs spread monthly based on turnover rate)
-    const monthlyTurnoverCosts = (RecruitmentCostPerSDR + OnboardingAndTrainingCostPerSDR) * 
-                                (MonthlyTurnoverRate / 100);
-    
-    // Total monthly cost per in-house SDR
-    const totalMonthlyInHouseCostPerSDR = monthlyDirectCostPerSDR + 
-                                         monthlyOperationalCosts + 
-                                         monthlyTurnoverCosts;
-    
-    // Total yearly in-house cost per SDR
-    const totalYearlyInHouseCostPerSDR = totalMonthlyInHouseCostPerSDR * 12;
-    
-    // Total cost for all SDRs
-    const totalMonthlyInHouseCostForAllSDRs = totalMonthlyInHouseCostPerSDR * SDRsSeekingToHire;
-    const totalYearlyInHouseCostForAllSDRs = totalYearlyInHouseCostPerSDR * SDRsSeekingToHire;
-    
-    // memoryBlue service cost calculations
-    const monthlyMemoryBlueCost = MonthlyFeePerSDR;
-    const yearlyMemoryBlueCost = monthlyMemoryBlueCost * 12;
-    const totalMonthlyMemoryBlueCostForAllSDRs = monthlyMemoryBlueCost * SDRsSeekingToHire;
-    const totalYearlyMemoryBlueCostForAllSDRs = yearlyMemoryBlueCost * SDRsSeekingToHire;
-    
-    // Cost comparison and savings
-    const monthlySavingsPerSDR = totalMonthlyInHouseCostPerSDR - monthlyMemoryBlueCost;
-    const yearlySavingsPerSDR = totalYearlyInHouseCostPerSDR - yearlyMemoryBlueCost;
-    const totalMonthlySavings = monthlySavingsPerSDR * SDRsSeekingToHire;
-    const totalYearlySavings = yearlySavingsPerSDR * SDRsSeekingToHire;
-    
-    // Calculate percentage savings
-    const savingsPercentage = (yearlySavingsPerSDR / totalYearlyInHouseCostPerSDR) * 100;
-    
+
+    const totalMonthlyInHouse = MonthlyInfrastructureAndFacilitiesCostPerSDR + managerCostAllocation/12
+    + OnboardingAndTrainingCostPerSDR * MonthlyTurnoverRate / 100 + RecruitmentCostPerSDR * MonthlyTurnoverRate / 100
+    + MonthlyLicensesAndSalesToolsCostPerSDR + benefitsCostPerSDR/12 + payrollTaxPerSDR/12 + AvgYearlyCommissionsPerSDR/12 + 
+    + YearlySalaryPerSDR/12 + LegalandCompliance
+
     // Return all calculations
     return {
       // In-house cost breakdowns
@@ -130,58 +102,38 @@ const Form = () => {
       managerCostAllocation,
       yearlyDirectCostPerSDR,
       monthlyDirectCostPerSDR,
-      monthlyOperationalCosts,
-      monthlyTurnoverCosts,
-      
-      // Total in-house costs
-      totalMonthlyInHouseCostPerSDR,
-      totalYearlyInHouseCostPerSDR,
-      totalMonthlyInHouseCostForAllSDRs,
-      totalYearlyInHouseCostForAllSDRs,
-      
-      // memoryBlue costs
-      monthlyMemoryBlueCost,
-      yearlyMemoryBlueCost,
-      totalMonthlyMemoryBlueCostForAllSDRs,
-      totalYearlyMemoryBlueCostForAllSDRs,
-      
-      // Savings
-      monthlySavingsPerSDR,
-      yearlySavingsPerSDR,
-      totalMonthlySavings,
-      totalYearlySavings,
-      savingsPercentage
+      totalMonthlyInHouse,
     };
   };
 
   // Validate form fields
   const validateForm = () => {
     const newErrors = {};
-    
+
     // Check for negative numbers
     Object.entries(formData).forEach(([key, value]) => {
       if (value < 0) {
         newErrors[key] = "Value cannot be negative";
       }
     });
-    
+
     // Validate specific fields
     if (formData.SDRsPerManager <= 0) {
       newErrors.SDRsPerManager = "Must have at least 1 SDR per manager";
     }
-    
+
     if (formData.SDRsSeekingToHire <= 0) {
       newErrors.SDRsSeekingToHire = "Must be hiring at least 1 SDR";
     }
-    
+
     if (formData.PayrollTaxRate <= 0 || formData.PayrollTaxRate > 100) {
       newErrors.PayrollTaxRate = "Tax rate must be between 0 and 100 percent";
     }
-    
+
     if (formData.BenefitsRate < 0 || formData.BenefitsRate > 100) {
       newErrors.BenefitsRate = "Benefits rate must be between 0 and 100 percent";
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -195,7 +147,7 @@ const Form = () => {
       maximumFractionDigits: 0
     }).format(value);
   };
-  
+
   // Format percentage values
   const formatPercentage = (value) => {
     return new Intl.NumberFormat('en-US', {
@@ -208,10 +160,10 @@ const Form = () => {
   // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     // Validate all fields
     const isValid = validateForm();
-    
+
     if (isValid) {
       // Calculate the costs
       const calculatedResults = calculateCosts();
@@ -226,7 +178,7 @@ const Form = () => {
       handleSubmit(e);
     }
   };
-  
+
   // Reset form to start over
   const handleReset = () => {
     setFormData({
@@ -245,21 +197,21 @@ const Form = () => {
 
   // Recalculate with current values
   const handleRecalculate = () => {
-    handleSubmit({ preventDefault: () => {} });
+    handleSubmit({ preventDefault: () => { } });
   };
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
       <h1 className="text-2xl font-bold text-center mb-6">SDR Cost Calculator: In-House vs. memoryBlue</h1>
-      
+
       <div className="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
         <p className="text-blue-800">
-          This calculator helps you compare the cost of hiring Sales Development Representatives (SDRs) in-house 
-          versus using memoryBlue's outsourced SDR services. Enter your company-specific values to get a 
+          This calculator helps you compare the cost of hiring Sales Development Representatives (SDRs) in-house
+          versus using memoryBlue's outsourced SDR services. Enter your company-specific values to get a
           personalized cost comparison.
         </p>
       </div>
-      
+
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="border-b pb-4">
           <h2 className="text-lg font-semibold mb-3">Company-Specific Information</h2>
@@ -280,7 +232,7 @@ const Form = () => {
               />
               {errors.YearlySalaryPerSDR && <p className="mt-1 text-sm text-red-600">{errors.YearlySalaryPerSDR}</p>}
             </div>
-            
+
             {/* Avg Yearly Commissions Per SDR */}
             <div>
               <label htmlFor="AvgYearlyCommissionsPerSDR" className="block text-sm font-medium text-gray-700 mb-1">
@@ -297,7 +249,7 @@ const Form = () => {
               />
               {errors.AvgYearlyCommissionsPerSDR && <p className="mt-1 text-sm text-red-600">{errors.AvgYearlyCommissionsPerSDR}</p>}
             </div>
-            
+
             {/* Payroll Tax Rate */}
             <div>
               <label htmlFor="PayrollTaxRate" className="block text-sm font-medium text-gray-700 mb-1">
@@ -315,7 +267,7 @@ const Form = () => {
               />
               {errors.PayrollTaxRate && <p className="mt-1 text-sm text-red-600">{errors.PayrollTaxRate}</p>}
             </div>
-            
+
             {/* Benefits Rate */}
             <div>
               <label htmlFor="BenefitsRate" className="block text-sm font-medium text-gray-700 mb-1">
@@ -333,7 +285,7 @@ const Form = () => {
               />
               {errors.BenefitsRate && <p className="mt-1 text-sm text-red-600">{errors.BenefitsRate}</p>}
             </div>
-            
+
             {/* Yearly Salary Per Manager */}
             <div>
               <label htmlFor="YearlySalaryPerManager" className="block text-sm font-medium text-gray-700 mb-1">
@@ -350,7 +302,7 @@ const Form = () => {
               />
               {errors.YearlySalaryPerManager && <p className="mt-1 text-sm text-red-600">{errors.YearlySalaryPerManager}</p>}
             </div>
-            
+
             {/* SDRs Per Manager */}
             <div>
               <label htmlFor="SDRsPerManager" className="block text-sm font-medium text-gray-700 mb-1">
@@ -367,7 +319,7 @@ const Form = () => {
               />
               {errors.SDRsPerManager && <p className="mt-1 text-sm text-red-600">{errors.SDRsPerManager}</p>}
             </div>
-            
+
             {/* SDRs Seeking To Hire */}
             <div>
               <label htmlFor="SDRsSeekingToHire" className="block text-sm font-medium text-gray-700 mb-1">
@@ -386,7 +338,7 @@ const Form = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="flex justify-end space-x-3">
           <button
             type="button"
@@ -403,175 +355,176 @@ const Form = () => {
           </button>
         </div>
       </form>
-      
+
       {isSubmitted && results && (
-        <div className="mt-8">
-          <h2 className="text-xl font-bold text-center mb-4">Cost Comparison Results</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* In-House Costs Section */}
-            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-              <h3 className="text-lg font-semibold mb-3 text-gray-800">In-House SDR Costs</h3>
-              
-              <div className="space-y-2 mb-4">
-                <p className="flex justify-between">
-                  <span>Base Salary:</span>
-                  <span>{formatCurrency(formData.YearlySalaryPerSDR)}/year</span>
-                </p>
-                <p className="flex justify-between">
-                  <span>Average Commissions:</span>
-                  <span>{formatCurrency(formData.AvgYearlyCommissionsPerSDR)}/year</span>
-                </p>
-                <p className="flex justify-between">
-                  <span>Payroll Taxes:</span>
-                  <span>{formatCurrency(results.payrollTaxPerSDR)}/year</span>
-                </p>
-                <p className="flex justify-between">
-                  <span>Benefits Cost:</span>
-                  <span>{formatCurrency(results.benefitsCostPerSDR)}/year</span>
-                </p>
-                <p className="flex justify-between">
-                  <span>Manager Cost Allocation:</span>
-                  <span>{formatCurrency(results.managerCostAllocation)}/year</span>
-                </p>
-                <p className="flex justify-between">
-                  <span>Licenses & Tools:</span>
-                  <span>{formatCurrency(fixedData.MonthlyLicensesAndSalesToolsCostPerSDR * 12)}/year</span>
-                </p>
-                <p className="flex justify-between">
-                  <span>Infrastructure & Facilities:</span>
-                  <span>{formatCurrency(fixedData.MonthlyInfrastructureAndFacilitiesCostPerSDR * 12)}/year</span>
-                </p>
-                <p className="flex justify-between">
-                  <span>Recruitment & Turnover:</span>
-                  <span>{formatCurrency(results.monthlyTurnoverCosts * 12)}/year</span>
-                </p>
-              </div>
-              
-              <div className="border-t pt-3 mt-3">
-                <p className="flex justify-between font-semibold">
-                  <span>Total Cost Per SDR:</span>
-                  <span>{formatCurrency(results.totalYearlyInHouseCostPerSDR)}/year</span>
-                </p>
-                <p className="flex justify-between text-sm text-gray-600">
-                  <span>Monthly Cost Per SDR:</span>
-                  <span>{formatCurrency(results.totalMonthlyInHouseCostPerSDR)}/month</span>
-                </p>
-                <p className="flex justify-between font-bold text-lg mt-2 pt-2 border-t">
-                  <span>Total In-House Cost ({formData.SDRsSeekingToHire} SDRs):</span>
-                  <span>{formatCurrency(results.totalYearlyInHouseCostForAllSDRs)}/year</span>
-                </p>
-              </div>
-            </div>
-            
-            {/* memoryBlue Costs Section */}
-            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-              <h3 className="text-lg font-semibold mb-3 text-blue-800">memoryBlue SDR Services</h3>
-              
-              <div className="space-y-2 mb-4">
-                <p className="flex justify-between">
-                  <span>Monthly Fee Per SDR:</span>
-                  <span>{formatCurrency(fixedData.MonthlyFeePerSDR)}/month</span>
-                </p>
-                <p className="flex justify-between italic text-sm text-gray-600">
-                  <span>No additional costs for:</span>
-                  <span></span>
-                </p>
-                <p className="flex justify-between text-sm text-gray-600">
-                  <span>• Recruitment & Training</span>
-                  <span>Included</span>
-                </p>
-                <p className="flex justify-between text-sm text-gray-600">
-                  <span>• Licenses & Technology</span>
-                  <span>Included</span>
-                </p>
-                <p className="flex justify-between text-sm text-gray-600">
-                  <span>• Management</span>
-                  <span>Included</span>
-                </p>
-                <p className="flex justify-between text-sm text-gray-600">
-                  <span>• Infrastructure</span>
-                  <span>Included</span>
-                </p>
-                <p className="flex justify-between text-sm text-gray-600">
-                  <span>• Payroll Taxes & Benefits</span>
-                  <span>Included</span>
-                </p>
-              </div>
-              
-              <div className="border-t pt-3 mt-3">
-                <p className="flex justify-between font-semibold">
-                  <span>Cost Per SDR:</span>
-                  <span>{formatCurrency(results.yearlyMemoryBlueCost)}/year</span>
-                </p>
-                <p className="flex justify-between text-sm text-gray-600">
-                  <span>Monthly Cost Per SDR:</span>
-                  <span>{formatCurrency(results.monthlyMemoryBlueCost)}/month</span>
-                </p>
-                <p className="flex justify-between font-bold text-lg mt-2 pt-2 border-t">
-                  <span>Total memoryBlue Cost ({formData.SDRsSeekingToHire} SDRs):</span>
-                  <span>{formatCurrency(results.totalYearlyMemoryBlueCostForAllSDRs)}/year</span>
-                </p>
-              </div>
-            </div>
-          </div>
-          
-          {/* Savings Summary */}
-          <div className="mt-6 bg-green-50 p-4 rounded-lg border border-green-200">
-            <h3 className="text-lg font-semibold mb-3 text-green-800">Potential Savings with memoryBlue</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <p className="flex justify-between font-medium">
-                  <span>Monthly Savings Per SDR:</span>
-                  <span>{formatCurrency(results.monthlySavingsPerSDR)}</span>
-                </p>
-                <p className="flex justify-between font-medium">
-                  <span>Yearly Savings Per SDR:</span>
-                  <span>{formatCurrency(results.yearlySavingsPerSDR)}</span>
-                </p>
-              </div>
-              
-              <div>
-                <p className="flex justify-between font-medium">
-                  <span>Total Monthly Savings:</span>
-                  <span>{formatCurrency(results.totalMonthlySavings)}</span>
-                </p>
-                <p className="flex justify-between font-bold">
-                  <span>Total Yearly Savings:</span>
-                  <span>{formatCurrency(results.totalYearlySavings)}</span>
-                </p>
-              </div>
-            </div>
-            
-            <div className="mt-4 pt-3 border-t text-center">
-              <p className="text-xl font-bold text-green-700">
-                Potential Cost Savings: {formatPercentage(results.savingsPercentage)}
-              </p>
-              <p className="text-sm text-gray-600 mt-1">
-                Based on your inputs, using memoryBlue's services could save approximately {formatCurrency(results.totalYearlySavings)} per year 
-                compared to hiring in-house SDRs.
-              </p>
-            </div>
-          </div>
-          
-          {/* Action Buttons */}
-          <div className="mt-6 flex justify-center space-x-4">
-            <button 
-              onClick={handleReset} 
-              className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition"
-            >
-              Start Over
-            </button>
-            <button 
-              onClick={handleRecalculate} 
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-            >
-              Recalculate
-            </button>
-          </div>
+        <div className="export-table"> 
+          <h2 className="text-xl font-bold text-center"> Cost Comparison Results</h2>
+          <table>
+            <thead>
+              <h3 className="text-lg font-semibold justify-center">Direct Monthly Costs per SDR</h3>
+              <tr>
+                <th className="text-lg font-semibold"> </th>
+                <th className="text-lg font-semibold justify-center"> In-House </th>
+                <th className="text-lg font-semibold justify-center"> memoryBlue </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="text-medium justify-left">Monthly Fee:</td>
+                <td lassName="text-medium justify-center"></td>
+                <td className="text-medium justify-center">{formatCurrency(fixedData.MonthlyFeePerSDR)}</td>
+              </tr>
+              <tr>
+                <td className="text-medium justify-left">Salary:</td>
+                <td className="text-medium justify-center">{formatCurrency(formData.YearlySalaryPerSDR/12)}</td>
+              </tr> 
+              <tr>
+                <td className="text-medium justify-left">Commissions:</td>
+                <td className="text-medium justify-center">{formatCurrency(formData.AvgYearlyCommissionsPerSDR/12)}</td>
+              </tr>
+              <tr>
+                <td className="text-medium justify-left">Payroll Tax:</td>
+                <td className="text-medium justify-center">{formatCurrency(results.payrollTaxPerSDR/12)}</td>
+              </tr>
+              <tr>
+                <td className="text-medium justify-left">Benefits:</td>
+                <td className="text-medium justify-center">{formatCurrency(results.benefitsCostPerSDR/12)}</td>
+              </tr>
+              <tr>
+                <td className="text-medium justify-left">Tools and Licenses:</td>
+                <td className="text-medium justify-center">{formatCurrency(fixedData.MonthlyLicensesAndSalesToolsCostPerSDR)}</td>
+              </tr>
+              <tr>
+                <td className="text-medium justify-left font-semisemibold">Total Direct Cost:</td>
+                <td className="text-medium justify-center font-semisemibold">{formatCurrency(fixedData.MonthlyLicensesAndSalesToolsCostPerSDR
+                  + results.benefitsCostPerSDR/12 + results.payrollTaxPerSDR/12 + formData.AvgYearlyCommissionsPerSDR/12 + 
+                  + formData.YearlySalaryPerSDR/12)}</td>
+                <td className="text-medium justify-center font-semisemibold">{formatCurrency(fixedData.MonthlyFeePerSDR)}</td>
+              </tr>
+            </tbody>
+            <thead>
+              <h3 className="text-lg font-semibold justify-center">Indirect Monthly Costs per SDR</h3>
+              <tr>
+                <th className="text-lg font-semibold"> </th>
+                <th className="text-lg font-semibold justify-center"> In-House </th>
+                <th className="text-lg font-semibold justify-center"> memoryBlue </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="text-medium justify-left">Management:</td>
+                <td className="text-medium justify-center">{formatCurrency(results.managerCostAllocation/12)}</td>
+              </tr>
+              <tr>
+                <td className="text-medium justify-left">Infrastructure:</td>
+                <td className="text-medium justify-center">{formatCurrency(fixedData.MonthlyInfrastructureAndFacilitiesCostPerSDR)}</td>
+              </tr>
+              <tr>
+                <td className="text-medium justify-left">Recruiting:</td>
+                <td className="text-medium justify-center">{formatCurrency(
+                  (fixedData.RecruitmentCostPerSDR) * fixedData.MonthlyTurnoverRate / 100
+                )}</td>
+              </tr> 
+              <tr>
+                <td className="text-medium justify-left">Onboarding:</td>
+                <td className="text-medium justify-center">{formatCurrency(
+                  (fixedData.OnboardingAndTrainingCostPerSDR) * fixedData.MonthlyTurnoverRate / 100
+                )}</td>
+              </tr> 
+              <tr>
+                <td className="text-medium justify-left">Legal and Compliance:</td>
+                <td className="text-medium justify-center">{formatCurrency(
+                  fixedData.LegalandCompliance
+                )}</td>
+              </tr>          
+              <tr>
+                <td className="text-medium justify-left font-semisemibold">Total Indirect Cost:</td>
+                <td className="text-medium justify-center font-semisemibold">{formatCurrency(
+                  fixedData.MonthlyInfrastructureAndFacilitiesCostPerSDR + results.managerCostAllocation/12
+                  + (fixedData.OnboardingAndTrainingCostPerSDR) * fixedData.MonthlyTurnoverRate / 100
+                  + (fixedData.RecruitmentCostPerSDR) * fixedData.MonthlyTurnoverRate / 100
+                )}</td>
+              </tr>
+            </tbody>
+            <thead>
+              <h3 className="text-lg font-semibold justify-center">One-Time Startup Costs per SDR</h3>
+              <tr>
+                <th className="text-lg font-semibold"> </th>
+                <th className="text-lg font-semibold justify-center"> In-House </th>
+                <th className="text-lg font-semibold justify-center"> memoryBlue </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="text-medium justify-left">Recruiting:</td>
+                <td className="text-medium justify-center">{formatCurrency(
+                  (fixedData.RecruitmentCostPerSDR) 
+                )}</td>
+              </tr> 
+              <tr>
+                <td className="text-medium justify-left">Onboarding:</td>
+                <td className="text-medium justify-center">{formatCurrency(
+                  (fixedData.OnboardingAndTrainingCostPerSDR) 
+                )}</td>
+              </tr>          
+              <tr>
+                <td className="text-medium justify-left font-semisemibold">Total Startup Cost:</td>
+                <td className="text-medium justify-center font-semisemibold">{formatCurrency(
+                  (fixedData.OnboardingAndTrainingCostPerSDR) 
+                  + (fixedData.RecruitmentCostPerSDR) 
+                )}</td>
+              </tr>
+            </tbody>
+            <thead>
+              <h3 className="text-lg font-semibold justify-center">First Year Costs per SDR</h3>
+              <tr>
+                <th className="text-lg font-semibold"> </th>
+                <th className="text-lg font-semibold justify-center"> In-House </th>
+                <th className="text-lg font-semibold justify-center"> memoryBlue </th>
+              </tr>
+            </thead>
+            <tbody>                  
+              <tr>
+                <td className="text-medium justify-left font-semisemibold">Total Monthly Cost:</td>
+                <td className="text-medium justify-center font-semisemibold">{formatCurrency(results.totalMonthlyInHouse)}</td>
+                <td className="text-medium justify-center font-semisemibold">{formatCurrency(fixedData.MonthlyFeePerSDR)}</td>
+              </tr>
+              <tr>
+                <td className="text-medium justify-left font-semisemibold">Total Yearly Cost:</td>
+                <td className="text-medium justify-center font-semisemibold">{formatCurrency(results.totalMonthlyInHouse*12)}</td>
+                <td className="text-medium justify-center font-semisemibold">{formatCurrency(fixedData.MonthlyFeePerSDR * 12)}</td>
+              </tr>
+              <tr>
+                <td className="text-medium justify-left font-semisemibold">First Year Cost:</td>
+                <td className="text-medium justify-center font-semisemibold">{formatCurrency(results.totalMonthlyInHouse*12 
+                  + (fixedData.OnboardingAndTrainingCostPerSDR) + (fixedData.RecruitmentCostPerSDR))}</td>
+                <td className="text-medium justify-center font-semisemibold">{formatCurrency(fixedData.MonthlyFeePerSDR * 12)}</td>
+              </tr>
+            </tbody>
+
+            <h3 className="text-lg font-semibold justify-center">Savings</h3>
+            <div className="text-medium justify-left font-semisemibold">Yearly Savings per SDR: {formatCurrency(results.totalMonthlyInHouse*12 
+              + (fixedData.OnboardingAndTrainingCostPerSDR) 
+              + (fixedData.RecruitmentCostPerSDR)
+              - fixedData.MonthlyFeePerSDR * 12)}</div>
+            <div className="text-medium justify-left font-semisemibold">Yearly Savings for {formData.SDRsSeekingToHire} SDRs: {formatCurrency((results.totalMonthlyInHouse*12 
+              + (fixedData.OnboardingAndTrainingCostPerSDR) 
+              + (fixedData.RecruitmentCostPerSDR)
+              - fixedData.MonthlyFeePerSDR * 12) * formData.SDRsSeekingToHire)}</div>
+          </table>
+          <h3 className="text-lg font-semibold justify-center">Additional Considerations</h3>
+          <div className="text-medium justify-left">
+              When outsourcing, there are additional qualitative comparisons to be considered.
+              Outsourcing to experienced professionals often yields higher pipeline throughput than starting
+              an in-house team. Outsourcing allows clients to rapidly scale up and down, including for seasonal sales efforts.
+              Outsourcing offers flexibility in hiring and firing, but without worrying about finding the right fit for your team 
+              or developing the right brand and culture.
+              Additionally, outsourcing avoids the opportunity cost of lost revenue when training the initial team,
+              whereas the outsourced team can jump right into the pipeline. Similarly, outsourcing avoids lost revenue to turnover
+              and spending on unproductive time. 
+           </div>
         </div>
-      )}
+      )} 
     </div>
   );
 };
