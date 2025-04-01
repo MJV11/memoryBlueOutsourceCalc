@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import './Form.css';  // Import the CSS file specific to this component
+
 
 // Main Form Component
 const Form = () => {
@@ -14,7 +16,7 @@ const Form = () => {
     BenefitsRate: 20, // Default 20% of salary for benefits
   });
 
-  const [fixedData, setFixedData] = useState({
+  const [fixedData] = useState({
     MonthlyFeePerSDR: 11500, // MemoryBlue offers services at 11500 monthly per SDR contracted
     MonthlyLicensesAndSalesToolsCostPerSDR: 225,
     MonthlyInfrastructureAndFacilitiesCostPerSDR: 350,
@@ -60,12 +62,10 @@ const Form = () => {
       PayrollTaxRate,
       YearlySalaryPerManager,
       SDRsPerManager,
-      SDRsSeekingToHire,
       BenefitsRate
     } = formData;
 
     const {
-      MonthlyFeePerSDR,
       MonthlyLicensesAndSalesToolsCostPerSDR,
       MonthlyInfrastructureAndFacilitiesCostPerSDR,
       RecruitmentCostPerSDR,
@@ -138,7 +138,6 @@ const Form = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Format currency values
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -148,13 +147,20 @@ const Form = () => {
     }).format(value);
   };
 
-  // Format percentage values
   const formatPercentage = (value) => {
     return new Intl.NumberFormat('en-US', {
       style: 'percent',
       minimumFractionDigits: 1,
       maximumFractionDigits: 1
     }).format(value / 100);
+  };
+
+  const formatDecimal = (value) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'decimal',
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1
+    }).format(value);
   };
 
   // Handle form submission
@@ -173,11 +179,11 @@ const Form = () => {
   };
 
   // Handle key press events - submit on Enter
-  const handleKeyPress = (e) => {
+  /**const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
       handleSubmit(e);
     }
-  };
+  };**/
 
   // Reset form to start over
   const handleReset = () => {
@@ -193,11 +199,6 @@ const Form = () => {
     setErrors({});
     setIsSubmitted(false);
     setResults(null);
-  };
-
-  // Recalculate with current values
-  const handleRecalculate = () => {
-    handleSubmit({ preventDefault: () => { } });
   };
 
   return (
@@ -341,8 +342,8 @@ const Form = () => {
           <table className="calc-table">
             <thead>
               <tr>
-                <th className="text-lg font-semibold"> </th>
-                <th className="text-lg font-semibold justify-center"> In-House </th>
+                <th className="text-lg font-semibold invis"> </th>
+                 <th className="text-lg font-semibold justify-center in-house-entry"> In-House </th>
                 <th className="text-lg font-semibold justify-center"> MemoryBlue </th>
               </tr>
             </thead>
@@ -385,8 +386,8 @@ const Form = () => {
           <table className="calc-table">
             <thead>
               <tr>
-                <th className="text-lg font-semibold"> </th>
-                <th className="text-lg font-semibold justify-center"> In-House </th>
+                <th className="text-lg font-semibold invis">  </th>
+                 <th className="text-lg font-semibold justify-center in-house-entry"> In-House </th>
                 <th className="text-lg font-semibold justify-center"> MemoryBlue </th>
               </tr>
             </thead>
@@ -431,8 +432,8 @@ const Form = () => {
           <table className="calc-table">
             <thead>
               <tr>
-                <th className="text-lg font-semibold"> </th>
-                <th className="text-lg font-semibold justify-center"> In-House </th>
+                <th className="text-lg font-semibold invis">  </th>
+                 <th className="text-lg font-semibold justify-center in-house-entry"> In-House </th>
                 <th className="text-lg font-semibold justify-center"> MemoryBlue </th>
               </tr>
             </thead>
@@ -462,8 +463,8 @@ const Form = () => {
           <table className="calc-table">
             <thead>
               <tr>
-                <th className="text-lg font-semibold"> </th>
-                <th className="text-lg font-semibold justify-center"> In-House </th>
+                <th className="text-lg font-semibold invis">  </th>
+                 <th className="text-lg font-semibold justify-center in-house-entry"> In-House </th>
                 <th className="text-lg font-semibold justify-center"> MemoryBlue </th>
               </tr>
             </thead>
@@ -490,30 +491,50 @@ const Form = () => {
 
           <h3 className="text-lg font-semibold justify-center table-subheading">Savings</h3>
           <table className="calc-table">
-            <tr>
-              <td className="text-medium justify-left font-semisemibold">Yearly Savings per SDR: </td>
-              <td className="text-medium justify-left font-semisemibold">{formatCurrency(results.totalMonthlyInHouse * 12
-                + (fixedData.OnboardingAndTrainingCostPerSDR)
-                + (fixedData.RecruitmentCostPerSDR)
-                - fixedData.MonthlyFeePerSDR * 12)}</td>
-            </tr>
-            <tr>
-              <td className="text-medium justify-left font-semisemibold">Yearly Savings for {formData.SDRsSeekingToHire} SDRs: </td>
-              <td className="text-medium justify-left font-semisemibold">{formatCurrency((results.totalMonthlyInHouse * 12
-                + (fixedData.OnboardingAndTrainingCostPerSDR)
-                + (fixedData.RecruitmentCostPerSDR)
-                - fixedData.MonthlyFeePerSDR * 12) * formData.SDRsSeekingToHire)}</td>
-            </tr>
+            <tbody>
+              <tr>
+                <td className="text-medium justify-left font-semisemibold">Yearly Savings per SDR: </td>
+                <td className="text-medium justify-left font-semisemibold">{formatCurrency(results.totalMonthlyInHouse * 12
+                  + (fixedData.OnboardingAndTrainingCostPerSDR)
+                  + (fixedData.RecruitmentCostPerSDR)
+                  - fixedData.MonthlyFeePerSDR * 12)}</td>
+              </tr>
+              <tr>
+                <td className="text-medium justify-left font-semisemibold savings-entry">Yearly Savings for {formData.SDRsSeekingToHire} SDRs: </td>
+                <td className="text-medium justify-left font-semisemibold">{formatCurrency((results.totalMonthlyInHouse * 12
+                  + (fixedData.OnboardingAndTrainingCostPerSDR)
+                  + (fixedData.RecruitmentCostPerSDR)
+                  - fixedData.MonthlyFeePerSDR * 12) * formData.SDRsSeekingToHire)}</td>
+              </tr>
+              <tr>
+                <td className="text-medium justify-left font-semisemibold">Savings Percentage: </td>
+                <td className="text-medium justify-left font-semisemibold">{formatPercentage((results.totalMonthlyInHouse * 12
+                  + fixedData.OnboardingAndTrainingCostPerSDR
+                  + fixedData.RecruitmentCostPerSDR
+                  - fixedData.MonthlyFeePerSDR * 12)
+                  / (results.totalMonthlyInHouse * 12
+                    + fixedData.OnboardingAndTrainingCostPerSDR
+                    + fixedData.RecruitmentCostPerSDR) * 100)}</td>
+              </tr>
+              <tr>
+                <td className="text-medium justify-left font-semisemibold">Months to Break Even: </td>
+                <td className="text-medium justify-left font-semisemibold">{formatDecimal((results.totalMonthlyInHouse * 12
+                  - fixedData.OnboardingAndTrainingCostPerSDR
+                  - fixedData.RecruitmentCostPerSDR)
+                  / results.totalMonthlyInHouse)}</td>
+              </tr>
+            </tbody>
           </table>
           <h3 className="text-lg font-semibold justify-center table-subheading">Additional Considerations</h3>
-          <div className="text-medium justify-left">
+          <div className="text-medium justify-center last">
             Outsourcing to experienced professionals often yields higher pipeline throughput than starting
             an in-house team. Outsourcing allows clients to rapidly scale up and down, including for seasonal sales efforts.
             Outsourcing offers flexibility in hiring and firing, but without worrying about finding the right fit for your team
-            or developing the right brand and culture.
+            or developing the right culture.
             Additionally, outsourcing avoids the opportunity cost of lost revenue when training the initial team,
-            whereas the outsourced team can jump right into the pipeline. Similarly, outsourcing avoids lost revenue to turnover
-            and spending on unproductive time.
+            as the outsourced team can jump right into the pipeline. Similarly, outsourcing avoids lost revenue to turnover
+            and spending on unproductive time. If you think outsourcing may be right for your firm, email us at 
+            sales@memoryblue.com
           </div>
         </div>
       )}
