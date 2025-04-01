@@ -3,7 +3,7 @@ import Form from './Form';
 
 function App() {
   return (
-    <div className="min-h-screen bg-gray-100 py-8">
+    <div className="flex-center bg-0062A6">
       <Form />
     </div>
   );

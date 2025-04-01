@@ -15,7 +15,7 @@ const Form = () => {
   });
 
   const [fixedData, setFixedData] = useState({
-    MonthlyFeePerSDR: 11500, // memoryBlue offers services at 11500 monthly per SDR contracted
+    MonthlyFeePerSDR: 11500, // MemoryBlue offers services at 11500 monthly per SDR contracted
     MonthlyLicensesAndSalesToolsCostPerSDR: 225,
     MonthlyInfrastructureAndFacilitiesCostPerSDR: 350,
     RecruitmentCostPerSDR: 7200,
@@ -89,10 +89,10 @@ const Form = () => {
     // Monthly direct cost per SDR
     const monthlyDirectCostPerSDR = yearlyDirectCostPerSDR / 12;
 
-    const totalMonthlyInHouse = MonthlyInfrastructureAndFacilitiesCostPerSDR + managerCostAllocation/12
-    + OnboardingAndTrainingCostPerSDR * MonthlyTurnoverRate / 100 + RecruitmentCostPerSDR * MonthlyTurnoverRate / 100
-    + MonthlyLicensesAndSalesToolsCostPerSDR + benefitsCostPerSDR/12 + payrollTaxPerSDR/12 + AvgYearlyCommissionsPerSDR/12 + 
-    + YearlySalaryPerSDR/12 + LegalandCompliance
+    const totalMonthlyInHouse = MonthlyInfrastructureAndFacilitiesCostPerSDR + managerCostAllocation / 12
+      + OnboardingAndTrainingCostPerSDR * MonthlyTurnoverRate / 100 + RecruitmentCostPerSDR * MonthlyTurnoverRate / 100
+      + MonthlyLicensesAndSalesToolsCostPerSDR + benefitsCostPerSDR / 12 + payrollTaxPerSDR / 12 + AvgYearlyCommissionsPerSDR / 12 +
+      + YearlySalaryPerSDR / 12 + LegalandCompliance
 
     // Return all calculations
     return {
@@ -201,171 +201,149 @@ const Form = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h1 className="text-2xl font-bold text-center mb-6">SDR Cost Calculator: In-House vs. memoryBlue</h1>
+    <div className="max-w-4xl  bg-white flex-center flex-column">
+      <h1 className="text-2xl font-bold justify-center">Insourcing vs. Outsourcing Calculator</h1>
 
-      <div className="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
-        <p className="text-blue-800">
-          This calculator helps you compare the cost of hiring Sales Development Representatives (SDRs) in-house
-          versus using memoryBlue's outsourced SDR services. Enter your company-specific values to get a
-          personalized cost comparison.
-        </p>
-      </div>
+      <p className="justify-center">
+        This calculator helps you compare the cost of hiring Sales Development Representatives (SDRs) in-house
+        versus using MemoryBlue's outsourced SDR services. Enter your company-specific values to get a
+        personalized cost comparison.
+      </p>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="border-b pb-4">
-          <h2 className="text-lg font-semibold mb-3">Company-Specific Information</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="flex-center flex-column justify-center">
+          <h2 className="text-lg font-semibold">Compare Costs:</h2>
+          <div className="">
             {/* Yearly Salary Per SDR */}
             <div>
-              <label htmlFor="YearlySalaryPerSDR" className="block text-sm font-medium text-gray-700 mb-1">
-                Yearly Salary Per SDR ($)
-              </label>
+              <label htmlFor="YearlySalaryPerSDR" className="block text-sm">Yearly Salary per SDR:</label>
+            </div>
+            <div>
               <input
                 type="number"
                 id="YearlySalaryPerSDR"
                 name="YearlySalaryPerSDR"
                 value={formData.YearlySalaryPerSDR}
                 onChange={handleChange}
-                onKeyPress={handleKeyPress}
-                className={`w-full px-3 py-2 border rounded-md ${errors.YearlySalaryPerSDR ? 'border-red-500' : 'border-gray-300'}`}
+                className={`input text-medium  ${errors.YearlySalaryPerSDR ? 'border-red-500' : 'border-gray-300'}`}
               />
-              {errors.YearlySalaryPerSDR && <p className="mt-1 text-sm text-red-600">{errors.YearlySalaryPerSDR}</p>}
+              {errors.YearlySalaryPerSDR && <p className="text-sm">{errors.YearlySalaryPerSDR}</p>}
             </div>
 
             {/* Avg Yearly Commissions Per SDR */}
             <div>
-              <label htmlFor="AvgYearlyCommissionsPerSDR" className="block text-sm font-medium text-gray-700 mb-1">
-                Avg Yearly Commissions Per SDR ($)
-              </label>
+              <label htmlFor="AvgYearlyCommissionsPerSDR" className="block text-sm">Average Yearly Commissions:</label>
+            </div><div>
               <input
                 type="number"
                 id="AvgYearlyCommissionsPerSDR"
                 name="AvgYearlyCommissionsPerSDR"
                 value={formData.AvgYearlyCommissionsPerSDR}
                 onChange={handleChange}
-                onKeyPress={handleKeyPress}
-                className={`w-full px-3 py-2 border rounded-md ${errors.AvgYearlyCommissionsPerSDR ? 'border-red-500' : 'border-gray-300'}`}
+                className={`input text-medium  ${errors.AvgYearlyCommissionsPerSDR ? 'border-red-500' : 'border-gray-300'}`}
               />
-              {errors.AvgYearlyCommissionsPerSDR && <p className="mt-1 text-sm text-red-600">{errors.AvgYearlyCommissionsPerSDR}</p>}
+              {errors.AvgYearlyCommissionsPerSDR && <p className="text-sm">{errors.AvgYearlyCommissionsPerSDR}</p>}
             </div>
 
             {/* Payroll Tax Rate */}
             <div>
-              <label htmlFor="PayrollTaxRate" className="block text-sm font-medium text-gray-700 mb-1">
-                Payroll Tax Rate (%)
-              </label>
+              <label htmlFor="PayrollTaxRate" className="block text-sm"> Payroll Tax Rate:</label>
+            </div>
+            <div>
               <input
                 type="number"
                 id="PayrollTaxRate"
                 name="PayrollTaxRate"
                 value={formData.PayrollTaxRate}
                 onChange={handleChange}
-                onKeyPress={handleKeyPress}
                 step="0.01"
-                className={`w-full px-3 py-2 border rounded-md ${errors.PayrollTaxRate ? 'border-red-500' : 'border-gray-300'}`}
+                className={`input text-medium  ${errors.PayrollTaxRate ? 'border-red-500' : 'border-gray-300'}`}
               />
-              {errors.PayrollTaxRate && <p className="mt-1 text-sm text-red-600">{errors.PayrollTaxRate}</p>}
+              {errors.PayrollTaxRate && <p className="text-sm">{errors.PayrollTaxRate}</p>}
             </div>
 
             {/* Benefits Rate */}
             <div>
-              <label htmlFor="BenefitsRate" className="block text-sm font-medium text-gray-700 mb-1">
-                Benefits Rate (% of Salary)
-              </label>
+              <label htmlFor="BenefitsRate" className="block text-sm">Benefits Rate (% of Salary):</label>
+            </div>
+            <div>
               <input
                 type="number"
                 id="BenefitsRate"
                 name="BenefitsRate"
                 value={formData.BenefitsRate}
                 onChange={handleChange}
-                onKeyPress={handleKeyPress}
                 step="0.1"
-                className={`w-full px-3 py-2 border rounded-md ${errors.BenefitsRate ? 'border-red-500' : 'border-gray-300'}`}
+                className={`input text-medium  ${errors.BenefitsRate ? 'border-red-500' : 'border-gray-300'}`}
               />
-              {errors.BenefitsRate && <p className="mt-1 text-sm text-red-600">{errors.BenefitsRate}</p>}
+              {errors.BenefitsRate && <p className="text-sm">{errors.BenefitsRate}</p>}
             </div>
 
             {/* Yearly Salary Per Manager */}
             <div>
-              <label htmlFor="YearlySalaryPerManager" className="block text-sm font-medium text-gray-700 mb-1">
-                Yearly Salary Per SDR Manager ($)
-              </label>
+              <label htmlFor="YearlySalaryPerManager" className="block text-sm">Yearly Salary per SDR Manager:</label>
+            </div>
+            <div>
               <input
                 type="number"
                 id="YearlySalaryPerManager"
                 name="YearlySalaryPerManager"
                 value={formData.YearlySalaryPerManager}
                 onChange={handleChange}
-                onKeyPress={handleKeyPress}
-                className={`w-full px-3 py-2 border rounded-md ${errors.YearlySalaryPerManager ? 'border-red-500' : 'border-gray-300'}`}
+                className={`input text-medium  ${errors.YearlySalaryPerManager ? 'border-red-500' : 'border-gray-300'}`}
               />
-              {errors.YearlySalaryPerManager && <p className="mt-1 text-sm text-red-600">{errors.YearlySalaryPerManager}</p>}
+              {errors.YearlySalaryPerManager && <p className="text-sm">{errors.YearlySalaryPerManager}</p>}
             </div>
 
             {/* SDRs Per Manager */}
             <div>
-              <label htmlFor="SDRsPerManager" className="block text-sm font-medium text-gray-700 mb-1">
-                SDRs Per Manager
-              </label>
+              <label htmlFor="SDRsPerManager" className="block text-sm">SDRs Per Manager:</label>
+            </div>
+            <div>
               <input
                 type="number"
                 id="SDRsPerManager"
                 name="SDRsPerManager"
                 value={formData.SDRsPerManager}
                 onChange={handleChange}
-                onKeyPress={handleKeyPress}
-                className={`w-full px-3 py-2 border rounded-md ${errors.SDRsPerManager ? 'border-red-500' : 'border-gray-300'}`}
+                className={`input text-medium  ${errors.SDRsPerManager ? 'border-red-500' : 'border-gray-300'}`}
               />
-              {errors.SDRsPerManager && <p className="mt-1 text-sm text-red-600">{errors.SDRsPerManager}</p>}
+              {errors.SDRsPerManager && <p className="text-sm">{errors.SDRsPerManager}</p>}
             </div>
 
             {/* SDRs Seeking To Hire */}
             <div>
-              <label htmlFor="SDRsSeekingToHire" className="block text-sm font-medium text-gray-700 mb-1">
-                Number of SDRs Seeking To Hire
-              </label>
+              <label htmlFor="SDRsSeekingToHire" className="block text-sm">Number of SDRs Seeking To Hire:</label>
+            </div>
+            <div>
               <input
                 type="number"
                 id="SDRsSeekingToHire"
                 name="SDRsSeekingToHire"
                 value={formData.SDRsSeekingToHire}
                 onChange={handleChange}
-                onKeyPress={handleKeyPress}
-                className={`w-full px-3 py-2 border rounded-md ${errors.SDRsSeekingToHire ? 'border-red-500' : 'border-gray-300'}`}
+                className={`input text-medium  ${errors.SDRsSeekingToHire ? 'border-red-500' : 'border-gray-300'}`}
               />
-              {errors.SDRsSeekingToHire && <p className="mt-1 text-sm text-red-600">{errors.SDRsSeekingToHire}</p>}
+              {errors.SDRsSeekingToHire && <p className="text-sm">{errors.SDRsSeekingToHire}</p>}
             </div>
           </div>
-        </div>
-
-        <div className="flex justify-end space-x-3">
-          <button
-            type="button"
-            onClick={handleReset}
-            className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition"
-          >
-            Reset Values
-          </button>
-          <button
-            type="submit"
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-          >
-            Calculate Costs
-          </button>
+          <div className="flex-column flex-center">
+            <button type="button" onClick={handleReset} className="input-button text-medium">Reset Values</button>
+            <button type="submit" className="input-button text-medium">Calculate Costs</button>
+          </div>
         </div>
       </form>
 
       {isSubmitted && results && (
-        <div className="export-table"> 
-          <h2 className="text-xl font-bold text-center"> Cost Comparison Results</h2>
-          <table>
+        <div className="export-table flex-center flex-column">
+          <h2 className="text-xl font-bold justify-center calc-results"> Cost Comparison Results</h2>
+          <h3 className="text-lg font-semibold justify-center table-subheading" col-span="3">Direct Monthly Costs per SDR</h3>
+          <table className="calc-table">
             <thead>
-              <h3 className="text-lg font-semibold justify-center">Direct Monthly Costs per SDR</h3>
               <tr>
                 <th className="text-lg font-semibold"> </th>
                 <th className="text-lg font-semibold justify-center"> In-House </th>
-                <th className="text-lg font-semibold justify-center"> memoryBlue </th>
+                <th className="text-lg font-semibold justify-center"> MemoryBlue </th>
               </tr>
             </thead>
             <tbody>
@@ -376,19 +354,19 @@ const Form = () => {
               </tr>
               <tr>
                 <td className="text-medium justify-left">Salary:</td>
-                <td className="text-medium justify-center">{formatCurrency(formData.YearlySalaryPerSDR/12)}</td>
-              </tr> 
+                <td className="text-medium justify-center">{formatCurrency(formData.YearlySalaryPerSDR / 12)}</td>
+              </tr>
               <tr>
                 <td className="text-medium justify-left">Commissions:</td>
-                <td className="text-medium justify-center">{formatCurrency(formData.AvgYearlyCommissionsPerSDR/12)}</td>
+                <td className="text-medium justify-center">{formatCurrency(formData.AvgYearlyCommissionsPerSDR / 12)}</td>
               </tr>
               <tr>
                 <td className="text-medium justify-left">Payroll Tax:</td>
-                <td className="text-medium justify-center">{formatCurrency(results.payrollTaxPerSDR/12)}</td>
+                <td className="text-medium justify-center">{formatCurrency(results.payrollTaxPerSDR / 12)}</td>
               </tr>
               <tr>
                 <td className="text-medium justify-left">Benefits:</td>
-                <td className="text-medium justify-center">{formatCurrency(results.benefitsCostPerSDR/12)}</td>
+                <td className="text-medium justify-center">{formatCurrency(results.benefitsCostPerSDR / 12)}</td>
               </tr>
               <tr>
                 <td className="text-medium justify-left">Tools and Licenses:</td>
@@ -397,23 +375,25 @@ const Form = () => {
               <tr>
                 <td className="text-medium justify-left font-semisemibold">Total Direct Cost:</td>
                 <td className="text-medium justify-center font-semisemibold">{formatCurrency(fixedData.MonthlyLicensesAndSalesToolsCostPerSDR
-                  + results.benefitsCostPerSDR/12 + results.payrollTaxPerSDR/12 + formData.AvgYearlyCommissionsPerSDR/12 + 
-                  + formData.YearlySalaryPerSDR/12)}</td>
+                  + results.benefitsCostPerSDR / 12 + results.payrollTaxPerSDR / 12 + formData.AvgYearlyCommissionsPerSDR / 12 +
+                  + formData.YearlySalaryPerSDR / 12)}</td>
                 <td className="text-medium justify-center font-semisemibold">{formatCurrency(fixedData.MonthlyFeePerSDR)}</td>
               </tr>
             </tbody>
+          </table>
+          <h3 className="text-lg font-semibold justify-center table-subheading">Indirect Monthly Costs per SDR</h3>
+          <table className="calc-table">
             <thead>
-              <h3 className="text-lg font-semibold justify-center">Indirect Monthly Costs per SDR</h3>
               <tr>
                 <th className="text-lg font-semibold"> </th>
                 <th className="text-lg font-semibold justify-center"> In-House </th>
-                <th className="text-lg font-semibold justify-center"> memoryBlue </th>
+                <th className="text-lg font-semibold justify-center"> MemoryBlue </th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <td className="text-medium justify-left">Management:</td>
-                <td className="text-medium justify-center">{formatCurrency(results.managerCostAllocation/12)}</td>
+                <td className="text-medium justify-center">{formatCurrency(results.managerCostAllocation / 12)}</td>
               </tr>
               <tr>
                 <td className="text-medium justify-left">Infrastructure:</td>
@@ -424,66 +404,70 @@ const Form = () => {
                 <td className="text-medium justify-center">{formatCurrency(
                   (fixedData.RecruitmentCostPerSDR) * fixedData.MonthlyTurnoverRate / 100
                 )}</td>
-              </tr> 
+              </tr>
               <tr>
                 <td className="text-medium justify-left">Onboarding:</td>
                 <td className="text-medium justify-center">{formatCurrency(
                   (fixedData.OnboardingAndTrainingCostPerSDR) * fixedData.MonthlyTurnoverRate / 100
                 )}</td>
-              </tr> 
+              </tr>
               <tr>
                 <td className="text-medium justify-left">Legal and Compliance:</td>
                 <td className="text-medium justify-center">{formatCurrency(
                   fixedData.LegalandCompliance
                 )}</td>
-              </tr>          
+              </tr>
               <tr>
                 <td className="text-medium justify-left font-semisemibold">Total Indirect Cost:</td>
                 <td className="text-medium justify-center font-semisemibold">{formatCurrency(
-                  fixedData.MonthlyInfrastructureAndFacilitiesCostPerSDR + results.managerCostAllocation/12
+                  fixedData.MonthlyInfrastructureAndFacilitiesCostPerSDR + results.managerCostAllocation / 12
                   + (fixedData.OnboardingAndTrainingCostPerSDR) * fixedData.MonthlyTurnoverRate / 100
                   + (fixedData.RecruitmentCostPerSDR) * fixedData.MonthlyTurnoverRate / 100
                 )}</td>
               </tr>
             </tbody>
+          </table>
+          <h3 className="text-lg font-semibold justify-center table-subheading">One-Time Startup Costs per SDR</h3>
+          <table className="calc-table">
             <thead>
-              <h3 className="text-lg font-semibold justify-center">One-Time Startup Costs per SDR</h3>
               <tr>
                 <th className="text-lg font-semibold"> </th>
                 <th className="text-lg font-semibold justify-center"> In-House </th>
-                <th className="text-lg font-semibold justify-center"> memoryBlue </th>
+                <th className="text-lg font-semibold justify-center"> MemoryBlue </th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <td className="text-medium justify-left">Recruiting:</td>
                 <td className="text-medium justify-center">{formatCurrency(
-                  (fixedData.RecruitmentCostPerSDR) 
+                  (fixedData.RecruitmentCostPerSDR)
                 )}</td>
-              </tr> 
+              </tr>
               <tr>
                 <td className="text-medium justify-left">Onboarding:</td>
                 <td className="text-medium justify-center">{formatCurrency(
-                  (fixedData.OnboardingAndTrainingCostPerSDR) 
+                  (fixedData.OnboardingAndTrainingCostPerSDR)
                 )}</td>
-              </tr>          
+              </tr>
               <tr>
                 <td className="text-medium justify-left font-semisemibold">Total Startup Cost:</td>
                 <td className="text-medium justify-center font-semisemibold">{formatCurrency(
-                  (fixedData.OnboardingAndTrainingCostPerSDR) 
-                  + (fixedData.RecruitmentCostPerSDR) 
+                  (fixedData.OnboardingAndTrainingCostPerSDR)
+                  + (fixedData.RecruitmentCostPerSDR)
                 )}</td>
               </tr>
             </tbody>
+          </table>
+          <h3 className="text-lg font-semibold justify-center table-subheading">First Year Costs per SDR</h3>
+          <table className="calc-table">
             <thead>
-              <h3 className="text-lg font-semibold justify-center">First Year Costs per SDR</h3>
               <tr>
                 <th className="text-lg font-semibold"> </th>
                 <th className="text-lg font-semibold justify-center"> In-House </th>
-                <th className="text-lg font-semibold justify-center"> memoryBlue </th>
+                <th className="text-lg font-semibold justify-center"> MemoryBlue </th>
               </tr>
             </thead>
-            <tbody>                  
+            <tbody>
               <tr>
                 <td className="text-medium justify-left font-semisemibold">Total Monthly Cost:</td>
                 <td className="text-medium justify-center font-semisemibold">{formatCurrency(results.totalMonthlyInHouse)}</td>
@@ -491,40 +475,48 @@ const Form = () => {
               </tr>
               <tr>
                 <td className="text-medium justify-left font-semisemibold">Total Yearly Cost:</td>
-                <td className="text-medium justify-center font-semisemibold">{formatCurrency(results.totalMonthlyInHouse*12)}</td>
+                <td className="text-medium justify-center font-semisemibold">{formatCurrency(results.totalMonthlyInHouse * 12)}</td>
                 <td className="text-medium justify-center font-semisemibold">{formatCurrency(fixedData.MonthlyFeePerSDR * 12)}</td>
               </tr>
               <tr>
                 <td className="text-medium justify-left font-semisemibold">First Year Cost:</td>
-                <td className="text-medium justify-center font-semisemibold">{formatCurrency(results.totalMonthlyInHouse*12 
+                <td className="text-medium justify-center font-semisemibold">{formatCurrency(results.totalMonthlyInHouse * 12
                   + (fixedData.OnboardingAndTrainingCostPerSDR) + (fixedData.RecruitmentCostPerSDR))}</td>
                 <td className="text-medium justify-center font-semisemibold">{formatCurrency(fixedData.MonthlyFeePerSDR * 12)}</td>
               </tr>
             </tbody>
-
-            <h3 className="text-lg font-semibold justify-center">Savings</h3>
-            <div className="text-medium justify-left font-semisemibold">Yearly Savings per SDR: {formatCurrency(results.totalMonthlyInHouse*12 
-              + (fixedData.OnboardingAndTrainingCostPerSDR) 
-              + (fixedData.RecruitmentCostPerSDR)
-              - fixedData.MonthlyFeePerSDR * 12)}</div>
-            <div className="text-medium justify-left font-semisemibold">Yearly Savings for {formData.SDRsSeekingToHire} SDRs: {formatCurrency((results.totalMonthlyInHouse*12 
-              + (fixedData.OnboardingAndTrainingCostPerSDR) 
-              + (fixedData.RecruitmentCostPerSDR)
-              - fixedData.MonthlyFeePerSDR * 12) * formData.SDRsSeekingToHire)}</div>
           </table>
-          <h3 className="text-lg font-semibold justify-center">Additional Considerations</h3>
+
+
+          <h3 className="text-lg font-semibold justify-center table-subheading">Savings</h3>
+          <table className="calc-table">
+            <tr>
+              <td className="text-medium justify-left font-semisemibold">Yearly Savings per SDR: </td>
+              <td className="text-medium justify-left font-semisemibold">{formatCurrency(results.totalMonthlyInHouse * 12
+                + (fixedData.OnboardingAndTrainingCostPerSDR)
+                + (fixedData.RecruitmentCostPerSDR)
+                - fixedData.MonthlyFeePerSDR * 12)}</td>
+            </tr>
+            <tr>
+              <td className="text-medium justify-left font-semisemibold">Yearly Savings for {formData.SDRsSeekingToHire} SDRs: </td>
+              <td className="text-medium justify-left font-semisemibold">{formatCurrency((results.totalMonthlyInHouse * 12
+                + (fixedData.OnboardingAndTrainingCostPerSDR)
+                + (fixedData.RecruitmentCostPerSDR)
+                - fixedData.MonthlyFeePerSDR * 12) * formData.SDRsSeekingToHire)}</td>
+            </tr>
+          </table>
+          <h3 className="text-lg font-semibold justify-center table-subheading">Additional Considerations</h3>
           <div className="text-medium justify-left">
-              When outsourcing, there are additional qualitative comparisons to be considered.
-              Outsourcing to experienced professionals often yields higher pipeline throughput than starting
-              an in-house team. Outsourcing allows clients to rapidly scale up and down, including for seasonal sales efforts.
-              Outsourcing offers flexibility in hiring and firing, but without worrying about finding the right fit for your team 
-              or developing the right brand and culture.
-              Additionally, outsourcing avoids the opportunity cost of lost revenue when training the initial team,
-              whereas the outsourced team can jump right into the pipeline. Similarly, outsourcing avoids lost revenue to turnover
-              and spending on unproductive time. 
-           </div>
+            Outsourcing to experienced professionals often yields higher pipeline throughput than starting
+            an in-house team. Outsourcing allows clients to rapidly scale up and down, including for seasonal sales efforts.
+            Outsourcing offers flexibility in hiring and firing, but without worrying about finding the right fit for your team
+            or developing the right brand and culture.
+            Additionally, outsourcing avoids the opportunity cost of lost revenue when training the initial team,
+            whereas the outsourced team can jump right into the pipeline. Similarly, outsourcing avoids lost revenue to turnover
+            and spending on unproductive time.
+          </div>
         </div>
-      )} 
+      )}
     </div>
   );
 };
