@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import './Form.css';  // Import the CSS file specific to this component
+import { useEffect } from "react";
+
 
 
 // Main Form Component
@@ -16,7 +18,7 @@ const Form = () => {
     BenefitsRate: 20, // Default 20% of salary for benefits
   });
 
-  const [fixedData] = useState({
+  const [fixedData, setFixedData] = useState({
     MonthlyFeePerSDR: 11500, // MemoryBlue offers services at 11500 monthly per SDR contracted
     MonthlyLicensesAndSalesToolsCostPerSDR: 225,
     MonthlyInfrastructureAndFacilitiesCostPerSDR: 350,
@@ -26,12 +28,75 @@ const Form = () => {
     LegalandCompliance: 0,
   });
 
+  const [currencyRates, setCurrencyRates] = useState({});
+  const [currency, setCurrency] = useState("USD");
+
+  useEffect(() => {
+    console.log("fetching currency rates")
+    fetch("https://api.exchangerate.host/latest?base=USD")
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("fetched currency rates")
+        console.log(data.success)
+        if (data.success === false) {
+          // hard code currency rates in case of failure
+          console.log("Error fetching data, using hardcoded rates");
+          setCurrencyRates({
+            EUR: 0.85,
+            GBP: 0.75,
+            JPY: 110.0,
+            AUD: 1.35,
+            CAD: 1.25
+          });
+        } else {
+          setCurrencyRates(data.rates);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching currency rates:", error);
+      });
+  }, []);
+
   // State to track form submission status
   const [isSubmitted, setIsSubmitted] = useState(false);
   // State to track validation errors
   const [errors, setErrors] = useState({});
   // State to track calculated results
   const [results, setResults] = useState(null);
+
+  const handleCurrencyChange = (e) => {
+    const newCurrency = e.target.value;
+
+    if (!currencyRates || !currencyRates[newCurrency]) {
+      console.warn("Currency rate not available yet.");
+      console.log(currencyRates)
+
+      setCurrencyRates({
+            EUR: 0.85,
+            GBP: 0.75,
+            JPY: 110.0,
+            AUD: 1.35,
+            CAD: 1.25
+          });;
+    }
+    const conversionRate = currencyRates[newCurrency];
+
+    if (!conversionRate) return;
+  
+    // Convert all USD fixed data values to the new currency
+    const convertedData = {
+      ...fixedData,
+      MonthlyFeePerSDR: Math.round(11500 * conversionRate),
+      MonthlyLicensesAndSalesToolsCostPerSDR: Math.round(225 * conversionRate),
+      MonthlyInfrastructureAndFacilitiesCostPerSDR: Math.round(350 * conversionRate),
+      RecruitmentCostPerSDR: Math.round(7200 * conversionRate),
+      OnboardingAndTrainingCostPerSDR: Math.round(8800 * conversionRate),
+      LegalandCompliance: Math.round(0 * conversionRate),
+    };
+  
+    setCurrency(newCurrency);
+    setFixedData(convertedData);
+  };
 
   // Handle input changes for all fields
   const handleChange = (e) => {
@@ -141,9 +206,9 @@ const Form = () => {
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD',
+      currency: currency,
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      maximumFractionDigits: 0,
     }).format(value);
   };
 
@@ -188,6 +253,7 @@ const Form = () => {
   // Reset form to start over
   const handleReset = () => {
     setFormData({
+      Currency: "$",
       YearlySalaryPerSDR: 65000,
       AvgYearlyCommissionsPerSDR: 36000,
       PayrollTaxRate: 7.65,
@@ -215,6 +281,28 @@ const Form = () => {
         <div className="flex-center flex-column justify-center">
           <h2 className="text-lg font-semibold">Compare Costs:</h2>
           <div className="">
+            {/* Select Currency */}
+            <div>
+              <label htmlFor="Currency" className="block text-sm">Select Currency:</label>
+            </div>
+            <div>
+              <select
+                id="Currency"
+                name="Currency"
+                value={currency}
+                onChange={handleCurrencyChange}
+                className={`input text-medium ${errors.Currency ? 'border-red-500' : 'border-gray-300'}`}
+              >
+                <option value="USD">USD - US Dollar</option>
+                <option value="EUR">EUR - Euro</option>
+                <option value="GBP">GBP - British Pound</option>
+                <option value="CAD">CAD - Canadian Dollar</option>
+                <option value="AUD">AUD - Australian Dollar</option>
+                <option value="JPY">JPY - Japanese Yen</option>
+              </select>
+              {errors.Currency && <p className="text-sm">{errors.Currency}</p>}
+            </div>
+
             {/* Yearly Salary Per SDR */}
             <div>
               <label htmlFor="YearlySalaryPerSDR" className="block text-sm">Yearly Salary per SDR:</label>
@@ -333,7 +421,7 @@ const Form = () => {
             <button type="submit" className="input-button text-medium">Calculate Costs</button>
           </div>
         </div>
-      </form>
+      </form >
 
       {isSubmitted && results && (
         <div className="export-table flex-center flex-column">
@@ -343,14 +431,14 @@ const Form = () => {
             <thead>
               <tr>
                 <th className="text-lg font-semibold invis"> </th>
-                 <th className="text-lg font-semibold justify-center in-house-entry"> In-House </th>
+                <th className="text-lg font-semibold justify-center in-house-entry"> In-House </th>
                 <th className="text-lg font-semibold justify-center"> MemoryBlue </th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <td className="text-medium justify-left">Monthly Fee:</td>
-                <td lassName="text-medium justify-center"></td>
+                <td className="text-medium justify-center"></td>
                 <td className="text-medium justify-center">{formatCurrency(fixedData.MonthlyFeePerSDR)}</td>
               </tr>
               <tr>
@@ -387,7 +475,7 @@ const Form = () => {
             <thead>
               <tr>
                 <th className="text-lg font-semibold invis">  </th>
-                 <th className="text-lg font-semibold justify-center in-house-entry"> In-House </th>
+                <th className="text-lg font-semibold justify-center in-house-entry"> In-House </th>
                 <th className="text-lg font-semibold justify-center"> MemoryBlue </th>
               </tr>
             </thead>
@@ -433,7 +521,7 @@ const Form = () => {
             <thead>
               <tr>
                 <th className="text-lg font-semibold invis">  </th>
-                 <th className="text-lg font-semibold justify-center in-house-entry"> In-House </th>
+                <th className="text-lg font-semibold justify-center in-house-entry"> In-House </th>
                 <th className="text-lg font-semibold justify-center"> MemoryBlue </th>
               </tr>
             </thead>
@@ -464,7 +552,7 @@ const Form = () => {
             <thead>
               <tr>
                 <th className="text-lg font-semibold invis">  </th>
-                 <th className="text-lg font-semibold justify-center in-house-entry"> In-House </th>
+                <th className="text-lg font-semibold justify-center in-house-entry"> In-House </th>
                 <th className="text-lg font-semibold justify-center"> MemoryBlue </th>
               </tr>
             </thead>
@@ -533,12 +621,12 @@ const Form = () => {
             or developing the right culture.
             Additionally, outsourcing avoids the opportunity cost of lost revenue when training the initial team,
             as the outsourced team can jump right into the pipeline. Similarly, outsourcing avoids lost revenue to turnover
-            and spending on unproductive time. If you think outsourcing may be right for your firm, email us at 
+            and spending on unproductive time. If you think outsourcing may be right for your firm, email us at
             sales@memoryblue.com
           </div>
         </div>
       )}
-    </div>
+    </div >
   );
 };
 
