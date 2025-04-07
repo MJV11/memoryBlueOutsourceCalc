@@ -32,12 +32,11 @@ const Form = () => {
   const [currency, setCurrency] = useState("USD");
 
   useEffect(() => {
-    console.log("fetching currency rates")
+    //console.log("fetching currency rates")
     fetch("https://api.exchangerate.host/latest?base=USD")
       .then((res) => res.json())
       .then((data) => {
-        console.log("fetched currency rates")
-        console.log(data.success)
+        //console.log("fetched currency rates")
         if (data.success === false) {
           // hard code currency rates in case of failure
           console.log("Error fetching data, using hardcoded rates");
@@ -96,6 +95,8 @@ const Form = () => {
   
     setCurrency(newCurrency);
     setFixedData(convertedData);
+    setIsSubmitted(false);
+    setResults(null);
   };
 
   // Handle input changes for all fields
@@ -155,7 +156,7 @@ const Form = () => {
     const monthlyDirectCostPerSDR = yearlyDirectCostPerSDR / 12;
 
     const totalMonthlyInHouse = MonthlyInfrastructureAndFacilitiesCostPerSDR + managerCostAllocation / 12
-      + OnboardingAndTrainingCostPerSDR * MonthlyTurnoverRate / 100 + RecruitmentCostPerSDR * MonthlyTurnoverRate / 100
+      + (OnboardingAndTrainingCostPerSDR * MonthlyTurnoverRate / 100) + (RecruitmentCostPerSDR * MonthlyTurnoverRate / 100)
       + MonthlyLicensesAndSalesToolsCostPerSDR + benefitsCostPerSDR / 12 + payrollTaxPerSDR / 12 + AvgYearlyCommissionsPerSDR / 12 +
       + YearlySalaryPerSDR / 12 + LegalandCompliance
 
