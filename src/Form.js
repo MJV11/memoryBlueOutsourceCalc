@@ -445,7 +445,7 @@ const Form = () => {
                 <td className="text-medium justify-center">{formatCurrency(fixedData.MonthlyFeePerSDR)}</td>
                 <td className="justify-left info-button">i
                   <div className="tooltip">
-                    Based on Glassdoor averages as of 2023.
+                    lorem ipsum
                   </div>
                 </td>
               </tr>
