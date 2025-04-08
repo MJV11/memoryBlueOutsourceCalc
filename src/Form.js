@@ -13,7 +13,7 @@ const Form = () => {
     AvgYearlyCommissionsPerSDR: 36000,
     PayrollTaxRate: 7.65, // Percentage
     YearlySalaryPerManager: 137000,
-    SDRsPerManager: 7,
+    SDRsPerManager: 8,
     SDRsSeekingToHire: 7,
     BenefitsRate: 20, // Default 20% of salary for benefits
   });
@@ -21,7 +21,6 @@ const Form = () => {
   const [fixedData, setFixedData] = useState({
     MonthlyFeePerSDR: 11500, // MemoryBlue offers services at 11500 monthly per SDR contracted
     MonthlyLicensesAndSalesToolsCostPerSDR: 225,
-    MonthlyInfrastructureAndFacilitiesCostPerSDR: 350,
     RecruitmentCostPerSDR: 7200,
     OnboardingAndTrainingCostPerSDR: 8800,
     MonthlyTurnoverRate: 30 / 12, // 30% is the bottom of the national yearly average
@@ -32,8 +31,8 @@ const Form = () => {
   const [currency, setCurrency] = useState("USD");
 
   useEffect(() => {
-    //console.log("fetching currency rates")
-    fetch("https://api.exchangerate.host/latest?base=USD")
+    //console.log("fetching currency rates") // for debugging
+    fetch("https://api.exchangerate.host/latest?base=USD") // they need an API Key
       .then((res) => res.json())
       .then((data) => {
         //console.log("fetched currency rates")
@@ -71,28 +70,27 @@ const Form = () => {
       console.log(currencyRates)
 
       setCurrencyRates({
-            EUR: 0.85,
-            GBP: 0.75,
-            JPY: 110.0,
-            AUD: 1.35,
-            CAD: 1.25
-          });;
+        EUR: 0.85,
+        GBP: 0.75,
+        JPY: 110.0,
+        AUD: 1.35,
+        CAD: 1.25
+      });;
     }
     const conversionRate = currencyRates[newCurrency];
 
     if (!conversionRate) return;
-  
+
     // Convert all USD fixed data values to the new currency
     const convertedData = {
       ...fixedData,
       MonthlyFeePerSDR: Math.round(11500 * conversionRate),
       MonthlyLicensesAndSalesToolsCostPerSDR: Math.round(225 * conversionRate),
-      MonthlyInfrastructureAndFacilitiesCostPerSDR: Math.round(350 * conversionRate),
       RecruitmentCostPerSDR: Math.round(7200 * conversionRate),
       OnboardingAndTrainingCostPerSDR: Math.round(8800 * conversionRate),
       LegalandCompliance: Math.round(0 * conversionRate),
     };
-  
+
     setCurrency(newCurrency);
     setFixedData(convertedData);
     setIsSubmitted(false);
@@ -128,21 +126,27 @@ const Form = () => {
       PayrollTaxRate,
       YearlySalaryPerManager,
       SDRsPerManager,
+      SDRsSeekingToHire,
       BenefitsRate
     } = formData;
 
     const {
       MonthlyLicensesAndSalesToolsCostPerSDR,
-      MonthlyInfrastructureAndFacilitiesCostPerSDR,
       RecruitmentCostPerSDR,
       OnboardingAndTrainingCostPerSDR,
       MonthlyTurnoverRate,
       LegalandCompliance
     } = fixedData;
 
+    let managersNeeded = SDRsSeekingToHire/SDRsPerManager;
+    if (managersNeeded > Math.floor(managersNeeded, 1)) {
+      managersNeeded = Math.floor(managersNeeded, 1) + 1;
+    }
+
     // Calculate in-house costs
     const payrollTaxPerSDR = (YearlySalaryPerSDR + AvgYearlyCommissionsPerSDR) * (PayrollTaxRate / 100);
     const benefitsCostPerSDR = YearlySalaryPerSDR * (BenefitsRate / 100);
+    const MonthlyInfrastructureAndFacilitiesCostPerSDR = (YearlySalaryPerSDR * SDRsSeekingToHire + managersNeeded * YearlySalaryPerManager) / SDRsSeekingToHire * .1 / 12;
 
     // Calculate manager cost allocation
     // This represents the cost of management spread across the SDR team
@@ -160,11 +164,10 @@ const Form = () => {
       + MonthlyLicensesAndSalesToolsCostPerSDR + benefitsCostPerSDR / 12 + payrollTaxPerSDR / 12 + AvgYearlyCommissionsPerSDR / 12 +
       + YearlySalaryPerSDR / 12 + LegalandCompliance
 
-    // Return all calculations
     return {
-      // In-house cost breakdowns
       payrollTaxPerSDR,
       benefitsCostPerSDR,
+      MonthlyInfrastructureAndFacilitiesCostPerSDR,
       managerCostAllocation,
       yearlyDirectCostPerSDR,
       monthlyDirectCostPerSDR,
@@ -176,7 +179,7 @@ const Form = () => {
   const validateForm = () => {
     const newErrors = {};
 
-    // Check for negative numbers
+    // No negative numbers
     Object.entries(formData).forEach(([key, value]) => {
       if (value < 0) {
         newErrors[key] = "Value cannot be negative";
@@ -237,7 +240,6 @@ const Form = () => {
     const isValid = validateForm();
 
     if (isValid) {
-      // Calculate the costs
       const calculatedResults = calculateCosts();
       setResults(calculatedResults);
       setIsSubmitted(true);
@@ -371,7 +373,7 @@ const Form = () => {
 
             {/* Yearly Salary Per Manager */}
             <div>
-              <label htmlFor="YearlySalaryPerManager" className="block text-sm">Yearly Salary per SDR Manager:</label>
+              <label htmlFor="YearlySalaryPerManager" className="block text-sm">Yearly Total Compensation per SDR Manager:</label>
             </div>
             <div>
               <input
@@ -433,7 +435,7 @@ const Form = () => {
               <tr>
                 <th className="text-lg font-semibold invis"> </th>
                 <th className="text-lg font-semibold justify-center in-house-entry"> In-House </th>
-                <th className="text-lg font-semibold justify-center"> MemoryBlue </th>
+                <th className="text-lg font-semibold justify-center memoryblue-entry"> MemoryBlue </th>
               </tr>
             </thead>
             <tbody>
@@ -441,14 +443,21 @@ const Form = () => {
                 <td className="text-medium justify-left">Monthly Fee:</td>
                 <td className="text-medium justify-center"></td>
                 <td className="text-medium justify-center">{formatCurrency(fixedData.MonthlyFeePerSDR)}</td>
+                <td className="justify-left info-button">i
+                  <div className="tooltip">
+                    Based on Glassdoor averages as of 2023.
+                  </div>
+                </td>
               </tr>
               <tr>
                 <td className="text-medium justify-left">Salary:</td>
                 <td className="text-medium justify-center">{formatCurrency(formData.YearlySalaryPerSDR / 12)}</td>
+                <td className="text-medium justify-center"></td>
               </tr>
               <tr>
                 <td className="text-medium justify-left">Commissions:</td>
                 <td className="text-medium justify-center">{formatCurrency(formData.AvgYearlyCommissionsPerSDR / 12)}</td>
+                <td className="text-medium justify-center"></td>
               </tr>
               <tr>
                 <td className="text-medium justify-left">Payroll Tax:</td>
@@ -457,6 +466,7 @@ const Form = () => {
               <tr>
                 <td className="text-medium justify-left">Benefits:</td>
                 <td className="text-medium justify-center">{formatCurrency(results.benefitsCostPerSDR / 12)}</td>
+                <td className="text-medium justify-center"></td>
               </tr>
               <tr>
                 <td className="text-medium justify-left">Tools and Licenses:</td>
@@ -477,7 +487,7 @@ const Form = () => {
               <tr>
                 <th className="text-lg font-semibold invis">  </th>
                 <th className="text-lg font-semibold justify-center in-house-entry"> In-House </th>
-                <th className="text-lg font-semibold justify-center"> MemoryBlue </th>
+                <th className="text-lg font-semibold justify-center memoryblue-entry"> MemoryBlue </th>
               </tr>
             </thead>
             <tbody>
@@ -487,19 +497,33 @@ const Form = () => {
               </tr>
               <tr>
                 <td className="text-medium justify-left">Infrastructure:</td>
-                <td className="text-medium justify-center">{formatCurrency(fixedData.MonthlyInfrastructureAndFacilitiesCostPerSDR)}</td>
+                <td className="text-medium justify-center">{formatCurrency(results.MonthlyInfrastructureAndFacilitiesCostPerSDR)}</td>
+                <td className="text-medium justify-center"></td>
+                <td className="justify-left info-button">i
+                  <div className="tooltip">
+                    Assuming an infrastructure cost at 10% of payroll.
+                  </div>
+                </td>
               </tr>
               <tr>
                 <td className="text-medium justify-left">Recruiting:</td>
-                <td className="text-medium justify-center">{formatCurrency(
-                  (fixedData.RecruitmentCostPerSDR) * fixedData.MonthlyTurnoverRate / 100
-                )}</td>
+                <td className="text-medium justify-center">{formatCurrency((fixedData.RecruitmentCostPerSDR) * fixedData.MonthlyTurnoverRate / 100)}</td>
+                <td className="text-medium justify-center"></td>
+                <td className="justify-left info-button">i
+                  <div className="tooltip">
+                    We find that the average cost for an SDR hire is {formatCurrency((fixedData.RecruitmentCostPerSDR))} and multiplied it by the industry average turnover rate of {formatPercentage(fixedData.MonthlyTurnoverRate)}
+                  </div>
+                </td>
               </tr>
               <tr>
                 <td className="text-medium justify-left">Onboarding:</td>
-                <td className="text-medium justify-center">{formatCurrency(
-                  (fixedData.OnboardingAndTrainingCostPerSDR) * fixedData.MonthlyTurnoverRate / 100
-                )}</td>
+                <td className="text-medium justify-center">{formatCurrency((fixedData.OnboardingAndTrainingCostPerSDR) * fixedData.MonthlyTurnoverRate / 100)}</td>
+                <td className="text-medium justify-center"></td>
+                <td className="justify-left info-button">i
+                  <div className="tooltip">
+                    We find that the average cost for an SDR hire is {formatCurrency((fixedData.OnboardingAndTrainingCostPerSDR))} and multiplied it by the industry average turnover rate of {formatPercentage(fixedData.MonthlyTurnoverRate)}
+                  </div>
+                </td>
               </tr>
               <tr>
                 <td className="text-medium justify-left">Legal and Compliance:</td>
@@ -510,7 +534,7 @@ const Form = () => {
               <tr>
                 <td className="text-medium justify-left font-semisemibold">Total Indirect Cost:</td>
                 <td className="text-medium justify-center font-semisemibold">{formatCurrency(
-                  fixedData.MonthlyInfrastructureAndFacilitiesCostPerSDR + results.managerCostAllocation / 12
+                  results.MonthlyInfrastructureAndFacilitiesCostPerSDR + results.managerCostAllocation / 12
                   + (fixedData.OnboardingAndTrainingCostPerSDR) * fixedData.MonthlyTurnoverRate / 100
                   + (fixedData.RecruitmentCostPerSDR) * fixedData.MonthlyTurnoverRate / 100
                 )}</td>
@@ -523,28 +547,34 @@ const Form = () => {
               <tr>
                 <th className="text-lg font-semibold invis">  </th>
                 <th className="text-lg font-semibold justify-center in-house-entry"> In-House </th>
-                <th className="text-lg font-semibold justify-center"> MemoryBlue </th>
+                <th className="text-lg font-semibold justify-center memoryblue-entry"> MemoryBlue </th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <td className="text-medium justify-left">Recruiting:</td>
-                <td className="text-medium justify-center">{formatCurrency(
-                  (fixedData.RecruitmentCostPerSDR)
-                )}</td>
+                <td className="text-medium justify-center">{formatCurrency((fixedData.RecruitmentCostPerSDR))}</td>
+                <td className="text-medium justify-center"></td>
+                <td className="justify-left info-button">i
+                  <div className="tooltip">
+                    We find that the average cost for an SDR hire is {formatCurrency((fixedData.RecruitmentCostPerSDR))}, which does not include external recruiters
+                  </div>
+                </td>
               </tr>
               <tr>
                 <td className="text-medium justify-left">Onboarding:</td>
-                <td className="text-medium justify-center">{formatCurrency(
-                  (fixedData.OnboardingAndTrainingCostPerSDR)
-                )}</td>
+                <td className="text-medium justify-center">{formatCurrency((fixedData.OnboardingAndTrainingCostPerSDR))}</td>
+                <td className="text-medium justify-center"></td>
+                <td className="justify-left info-button">i
+                  <div className="tooltip">
+                    We find that the average cost for an SDR hire is {formatCurrency((fixedData.OnboardingAndTrainingCostPerSDR))}
+                  </div>
+                </td>
               </tr>
               <tr>
                 <td className="text-medium justify-left font-semisemibold">Total Startup Cost:</td>
                 <td className="text-medium justify-center font-semisemibold">{formatCurrency(
-                  (fixedData.OnboardingAndTrainingCostPerSDR)
-                  + (fixedData.RecruitmentCostPerSDR)
-                )}</td>
+                  (fixedData.OnboardingAndTrainingCostPerSDR) + (fixedData.RecruitmentCostPerSDR))}</td>
               </tr>
             </tbody>
           </table>
@@ -554,7 +584,7 @@ const Form = () => {
               <tr>
                 <th className="text-lg font-semibold invis">  </th>
                 <th className="text-lg font-semibold justify-center in-house-entry"> In-House </th>
-                <th className="text-lg font-semibold justify-center"> MemoryBlue </th>
+                <th className="text-lg font-semibold justify-center memoryblue-entry"> MemoryBlue </th>
               </tr>
             </thead>
             <tbody>
@@ -564,15 +594,20 @@ const Form = () => {
                 <td className="text-medium justify-center font-semisemibold">{formatCurrency(fixedData.MonthlyFeePerSDR)}</td>
               </tr>
               <tr>
-                <td className="text-medium justify-left font-semisemibold">Total Yearly Cost:</td>
-                <td className="text-medium justify-center font-semisemibold">{formatCurrency(results.totalMonthlyInHouse * 12)}</td>
-                <td className="text-medium justify-center font-semisemibold">{formatCurrency(fixedData.MonthlyFeePerSDR * 12)}</td>
-              </tr>
-              <tr>
                 <td className="text-medium justify-left font-semisemibold">First Year Cost:</td>
                 <td className="text-medium justify-center font-semisemibold">{formatCurrency(results.totalMonthlyInHouse * 12
                   + (fixedData.OnboardingAndTrainingCostPerSDR) + (fixedData.RecruitmentCostPerSDR))}</td>
                 <td className="text-medium justify-center font-semisemibold">{formatCurrency(fixedData.MonthlyFeePerSDR * 12)}</td>
+              </tr>
+              <tr>
+                <td className="text-medium justify-left font-semisemibold">Subsequent Yearly Cost:</td>
+                <td className="text-medium justify-center font-semisemibold">{formatCurrency(results.totalMonthlyInHouse * 12)}</td>
+                <td className="text-medium justify-center font-semisemibold">{formatCurrency(fixedData.MonthlyFeePerSDR * 12)}</td>
+                <td className="justify-left info-button">i
+                  <div className="tooltip">
+                    After the first year, this is the savings for every subsequent year. First year costs are more because of the one-time start-up costs.
+                  </div>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -583,27 +618,17 @@ const Form = () => {
             <tbody>
               <tr>
                 <td className="text-medium justify-left font-semisemibold">Yearly Savings per SDR: </td>
-                <td className="text-medium justify-left font-semisemibold">{formatCurrency(results.totalMonthlyInHouse * 12
-                  + (fixedData.OnboardingAndTrainingCostPerSDR)
-                  + (fixedData.RecruitmentCostPerSDR)
-                  - fixedData.MonthlyFeePerSDR * 12)}</td>
+                <td className="text-medium justify-left font-semisemibold">{formatCurrency(results.totalMonthlyInHouse * 12 - fixedData.MonthlyFeePerSDR * 12)}</td>
               </tr>
               <tr>
                 <td className="text-medium justify-left font-semisemibold savings-entry">Yearly Savings for {formData.SDRsSeekingToHire} SDRs: </td>
                 <td className="text-medium justify-left font-semisemibold">{formatCurrency((results.totalMonthlyInHouse * 12
-                  + (fixedData.OnboardingAndTrainingCostPerSDR)
-                  + (fixedData.RecruitmentCostPerSDR)
                   - fixedData.MonthlyFeePerSDR * 12) * formData.SDRsSeekingToHire)}</td>
               </tr>
               <tr>
-                <td className="text-medium justify-left font-semisemibold">Savings Percentage: </td>
+                <td className="text-medium justify-left font-semisemibold">Yearly Savings Percentage: </td>
                 <td className="text-medium justify-left font-semisemibold">{formatPercentage((results.totalMonthlyInHouse * 12
-                  + fixedData.OnboardingAndTrainingCostPerSDR
-                  + fixedData.RecruitmentCostPerSDR
-                  - fixedData.MonthlyFeePerSDR * 12)
-                  / (results.totalMonthlyInHouse * 12
-                    + fixedData.OnboardingAndTrainingCostPerSDR
-                    + fixedData.RecruitmentCostPerSDR) * 100)}</td>
+                  - fixedData.MonthlyFeePerSDR * 12) / (results.totalMonthlyInHouse * 12) * 100)}</td>
               </tr>
               <tr>
                 <td className="text-medium justify-left font-semisemibold">Months to Break Even: </td>
@@ -611,6 +636,12 @@ const Form = () => {
                   - fixedData.OnboardingAndTrainingCostPerSDR
                   - fixedData.RecruitmentCostPerSDR)
                   / results.totalMonthlyInHouse)}</td>
+                <td className="justify-left info-button">i
+                  <div className="tooltip">
+                    Based on Glassdoor averages as of 2023.
+                  </div>
+                </td>
+
               </tr>
             </tbody>
           </table>
