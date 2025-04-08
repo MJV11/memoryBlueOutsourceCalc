@@ -639,8 +639,8 @@ const Form = () => {
             an in-house team. Outsourcing allows clients to rapidly scale up and down, including for seasonal sales efforts.
             Outsourcing offers flexibility in hiring and firing, but without worrying about finding the right fit for your team
             or developing the right culture.
-            Additionally, outsourcing avoids the opportunity cost of lost revenue when training the initial team,
-            as the outsourced team can jump right into the pipeline. Similarly, outsourcing avoids lost revenue to turnover
+            Additionally, outsourcing avoids the opportunity cost of lost revenue when training the initial team.
+            The outsourced team has significantly shorter ramp up time, and can jump right into the pipeline. Similarly, outsourcing avoids lost revenue to turnover
             and spending on unproductive time. If you think outsourcing may be right for your firm, email us at
             sales@memoryblue.com
           </div>
