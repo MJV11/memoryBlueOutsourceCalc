@@ -630,19 +630,7 @@ const Form = () => {
                 <td className="text-medium justify-left font-semisemibold">{formatPercentage((results.totalMonthlyInHouse * 12
                   - fixedData.MonthlyFeePerSDR * 12) / (results.totalMonthlyInHouse * 12) * 100)}</td>
               </tr>
-              <tr>
-                <td className="text-medium justify-left font-semisemibold">Months to Break Even: </td>
-                <td className="text-medium justify-left font-semisemibold">{formatDecimal((results.totalMonthlyInHouse * 12
-                  - fixedData.OnboardingAndTrainingCostPerSDR
-                  - fixedData.RecruitmentCostPerSDR)
-                  / results.totalMonthlyInHouse)}</td>
-                <td className="justify-left info-button">i
-                  <div className="tooltip">
-                    Based on Glassdoor averages as of 2023.
-                  </div>
-                </td>
-
-              </tr>
+              
             </tbody>
           </table>
           <h3 className="text-lg font-semibold justify-center table-subheading">Additional Considerations</h3>
