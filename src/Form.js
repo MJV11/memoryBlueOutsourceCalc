@@ -40,6 +40,7 @@ const Form = () => {
           // hard code currency rates in case of failure
           console.log("Error fetching data, using hardcoded rates");
           setCurrencyRates({
+            USD: 1.0,
             EUR: 0.85,
             GBP: 0.75,
             JPY: 110.0,
