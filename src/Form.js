@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import './Form.css';  // Import the CSS file specific to this component
 import { useEffect } from "react";
 
+//add more info, everywhere
+//add location and autofill rates
 
 
 // Main Form Component
@@ -12,8 +14,7 @@ const Form = () => {
     YearlySalaryPerSDR: 65000,
     AvgYearlyCommissionsPerSDR: 36000,
     PayrollTaxRate: 7.65, // Percentage
-    YearlySalaryPerManager: 137000,
-    SDRsPerManager: 8,
+    SDRManagementCost: 137000,
     SDRsSeekingToHire: 7,
     BenefitsRate: 20, // Default 20% of salary for benefits
   });
@@ -126,8 +127,7 @@ const Form = () => {
       YearlySalaryPerSDR,
       AvgYearlyCommissionsPerSDR,
       PayrollTaxRate,
-      YearlySalaryPerManager,
-      SDRsPerManager,
+      SDRManagementCost,
       SDRsSeekingToHire,
       BenefitsRate
     } = formData;
@@ -140,19 +140,14 @@ const Form = () => {
       LegalandCompliance
     } = fixedData;
 
-    let managersNeeded = SDRsSeekingToHire/SDRsPerManager;
-    if (managersNeeded > Math.floor(managersNeeded, 1)) {
-      managersNeeded = Math.floor(managersNeeded, 1) + 1;
-    }
-
     // Calculate in-house costs
     const payrollTaxPerSDR = (YearlySalaryPerSDR + AvgYearlyCommissionsPerSDR) * (PayrollTaxRate / 100);
     const benefitsCostPerSDR = YearlySalaryPerSDR * (BenefitsRate / 100);
-    const MonthlyInfrastructureAndFacilitiesCostPerSDR = (YearlySalaryPerSDR * SDRsSeekingToHire + managersNeeded * YearlySalaryPerManager) / SDRsSeekingToHire * .1 / 12;
+    const MonthlyInfrastructureAndFacilitiesCostPerSDR = (YearlySalaryPerSDR * SDRsSeekingToHire + SDRManagementCost) / SDRsSeekingToHire * .1 / 12;
 
     // Calculate manager cost allocation
     // This represents the cost of management spread across the SDR team
-    const managerCostAllocation = (YearlySalaryPerManager / SDRsPerManager);
+    const managerCostAllocation = (SDRManagementCost / SDRsSeekingToHire );
 
     // Calculate total yearly direct cost per SDR
     const yearlyDirectCostPerSDR = YearlySalaryPerSDR + AvgYearlyCommissionsPerSDR +
@@ -189,10 +184,6 @@ const Form = () => {
     });
 
     // Validate specific fields
-    if (formData.SDRsPerManager <= 0) {
-      newErrors.SDRsPerManager = "Must have at least 1 SDR per manager";
-    }
-
     if (formData.SDRsSeekingToHire <= 0) {
       newErrors.SDRsSeekingToHire = "Must be hiring at least 1 SDR";
     }
@@ -262,8 +253,7 @@ const Form = () => {
       YearlySalaryPerSDR: 65000,
       AvgYearlyCommissionsPerSDR: 36000,
       PayrollTaxRate: 7.65,
-      YearlySalaryPerManager: 137000,
-      SDRsPerManager: 7,
+      SDRManagementCost: 137000,
       SDRsSeekingToHire: 7,
       BenefitsRate: 20,
     });
@@ -373,37 +363,23 @@ const Form = () => {
               {errors.BenefitsRate && <p className="text-sm">{errors.BenefitsRate}</p>}
             </div>
 
-            {/* Yearly Salary Per Manager */}
+            {/* SDR Management Cost */}
             <div>
-              <label htmlFor="YearlySalaryPerManager" className="block text-sm">Yearly Total Compensation per SDR Manager:</label>
+              <label htmlFor="SDRManagementCost" className="block text-sm">Cost to Manage SDR Resources:</label>
             </div>
             <div>
               <input
                 type="number"
-                id="YearlySalaryPerManager"
-                name="YearlySalaryPerManager"
-                value={formData.YearlySalaryPerManager}
+                id="SDRManagementCost"
+                name="SDRManagementCost"
+                value={formData.SDRManagementCost}
                 onChange={handleChange}
-                className={`input text-medium  ${errors.YearlySalaryPerManager ? 'border-red-500' : 'border-gray-300'}`}
+                className={`input text-medium  ${errors.SDRManagementCost ? 'border-red-500' : 'border-gray-300'}`}
               />
-              {errors.YearlySalaryPerManager && <p className="text-sm">{errors.YearlySalaryPerManager}</p>}
+              {errors.SDRManagementCost && <p className="text-sm">{errors.SDRManagementCost}</p>}
             </div>
 
-            {/* SDRs Per Manager */}
-            <div>
-              <label htmlFor="SDRsPerManager" className="block text-sm">SDRs Per Manager:</label>
-            </div>
-            <div>
-              <input
-                type="number"
-                id="SDRsPerManager"
-                name="SDRsPerManager"
-                value={formData.SDRsPerManager}
-                onChange={handleChange}
-                className={`input text-medium  ${errors.SDRsPerManager ? 'border-red-500' : 'border-gray-300'}`}
-              />
-              {errors.SDRsPerManager && <p className="text-sm">{errors.SDRsPerManager}</p>}
-            </div>
+            
 
             {/* SDRs Seeking To Hire */}
             <div>
