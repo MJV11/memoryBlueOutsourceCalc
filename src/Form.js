@@ -25,7 +25,6 @@ const Form = () => {
     RecruitmentCostPerSDR: 7200,
     OnboardingAndTrainingCostPerSDR: 8800,
     MonthlyTurnoverRate: 30 / 12, // 30% is the bottom of the national yearly average
-    LegalandCompliance: 0,
   });
 
   const [currencyRates, setCurrencyRates] = useState({});
@@ -33,11 +32,13 @@ const Form = () => {
 
   useEffect(() => {
     //console.log("fetching currency rates") // for debugging
-    fetch("https://api.frankfurter.dev/v1/latest?base=USD&symbols=EUR,GBP,JPY,AUD,CAD") // they need an API Key
+    fetch("https://api.frankfurter.dev/v1/latest?base=USD&symbols=EUR,GBP,JPY,AUD,CAD") // great psuedonym
       .then((res) => res.json())
       .then((data) => {
-        //console.log("fetched currency rates")
-        if (data.success === false) {
+        if (data) {
+          console.log("successfully fetched currency rates", data.rates)
+          setCurrencyRates(data.rates);
+        } else {
           // hard code currency rates in case of failure. Rates as of May 1, 2025
           console.log("Error fetching data, using hardcoded rates");
           setCurrencyRates({
@@ -48,9 +49,6 @@ const Form = () => {
             AUD: 1.5649,
             CAD: 1.3829
           });
-        } else {
-          console.log("successfully fetched currency rates", data.rates)
-          setCurrencyRates(data.rates);
         }
       })
       .catch((error) => {
@@ -92,7 +90,6 @@ const Form = () => {
       MonthlyLicensesAndSalesToolsCostPerSDR: Math.round(225 * conversionRate),
       RecruitmentCostPerSDR: Math.round(7200 * conversionRate),
       OnboardingAndTrainingCostPerSDR: Math.round(8800 * conversionRate),
-      LegalandCompliance: Math.round(0 * conversionRate),
     };
 
     setCurrency(newCurrency);
@@ -138,7 +135,7 @@ const Form = () => {
       RecruitmentCostPerSDR,
       OnboardingAndTrainingCostPerSDR,
       MonthlyTurnoverRate,
-      LegalandCompliance
+      
     } = fixedData;
 
     // Calculate in-house costs
@@ -160,7 +157,7 @@ const Form = () => {
     const totalMonthlyInHouse = MonthlyInfrastructureAndFacilitiesCostPerSDR + managerCostAllocation / 12
       + (OnboardingAndTrainingCostPerSDR * MonthlyTurnoverRate / 100) + (RecruitmentCostPerSDR * MonthlyTurnoverRate / 100)
       + MonthlyLicensesAndSalesToolsCostPerSDR + benefitsCostPerSDR / 12 + payrollTaxPerSDR / 12 + AvgYearlyCommissionsPerSDR / 12 +
-      + YearlySalaryPerSDR / 12 + LegalandCompliance
+      + YearlySalaryPerSDR / 12 
 
     return {
       payrollTaxPerSDR,
@@ -218,13 +215,13 @@ const Form = () => {
     }).format(value / 100);
   };
 
-  const formatDecimal = (value) => {
+  /**const formatDecimal = (value) => {
     return new Intl.NumberFormat('en-US', {
       style: 'decimal',
       minimumFractionDigits: 1,
       maximumFractionDigits: 1
     }).format(value);
-  };
+  }; **/
 
   // Handle form submission
   const handleSubmit = (e) => {
@@ -278,8 +275,8 @@ const Form = () => {
           <h2 className="text-lg font-semibold">Compare Costs:</h2>
           <div className="">
             {/* Select Currency */}
-            <div>
-              <label htmlFor="Currency" className="block text-sm">Select Currency:</label>
+            <div className="input-category">
+              <label htmlFor="Currency" className="block justify-center text-sm">Select Currency:</label>
             </div>
             <div>
               <select
@@ -300,8 +297,8 @@ const Form = () => {
             </div>
 
             {/* Yearly Salary Per SDR */}
-            <div>
-              <label htmlFor="YearlySalaryPerSDR" className="block text-sm">Yearly Salary per SDR:</label>
+            <div className="input-category">
+              <label htmlFor="YearlySalaryPerSDR" className="block justify-center text-sm">Yearly Salary per SDR:</label>
             </div>
             <div>
               <input
@@ -313,12 +310,17 @@ const Form = () => {
                 className={`input text-medium  ${errors.YearlySalaryPerSDR ? 'border-red-500' : 'border-gray-300'}`}
               />
               {errors.YearlySalaryPerSDR && <p className="text-sm">{errors.YearlySalaryPerSDR}</p>}
+              <div className="input-hint info-button">i
+                <div className="tooltip"> The average yearly salary in the US is $65000</div>
+              </div>
             </div>
 
             {/* Avg Yearly Commissions Per SDR */}
+            <div className="input-category">
+              <label htmlFor="AvgYearlyCommissionsPerSDR" className="block justify-center text-sm">Average Yearly Commissions:</label>
+            </div>
+            
             <div>
-              <label htmlFor="AvgYearlyCommissionsPerSDR" className="block text-sm">Average Yearly Commissions:</label>
-            </div><div>
               <input
                 type="number"
                 id="AvgYearlyCommissionsPerSDR"
@@ -328,11 +330,14 @@ const Form = () => {
                 className={`input text-medium  ${errors.AvgYearlyCommissionsPerSDR ? 'border-red-500' : 'border-gray-300'}`}
               />
               {errors.AvgYearlyCommissionsPerSDR && <p className="text-sm">{errors.AvgYearlyCommissionsPerSDR}</p>}
+              <div className="input-hint info-button">i
+                <div className="tooltip"> The average yearly commissions in the US is $30000</div>
+              </div>
             </div>
 
             {/* Payroll Tax Rate */}
-            <div>
-              <label htmlFor="PayrollTaxRate" className="block text-sm"> Payroll Tax Rate:</label>
+            <div className="input-category">
+              <label htmlFor="PayrollTaxRate" className="block justify-center text-sm"> Payroll Tax Rate:</label>
             </div>
             <div>
               <input
@@ -345,11 +350,14 @@ const Form = () => {
                 className={`input text-medium  ${errors.PayrollTaxRate ? 'border-red-500' : 'border-gray-300'}`}
               />
               {errors.PayrollTaxRate && <p className="text-sm">{errors.PayrollTaxRate}</p>}
+              <div className="input-hint info-button">i
+                <div className="tooltip"> The US base payroll tax rate is 7.65%</div>
+              </div>
             </div>
 
             {/* Benefits Rate */}
-            <div>
-              <label htmlFor="BenefitsRate" className="block text-sm">Benefits Rate (% of Salary):</label>
+            <div className="input-category">
+              <label htmlFor="BenefitsRate" className="block justify-center text-sm">Benefits Rate (% of Salary):</label>
             </div>
             <div>
               <input
@@ -362,12 +370,16 @@ const Form = () => {
                 className={`input text-medium  ${errors.BenefitsRate ? 'border-red-500' : 'border-gray-300'}`}
               />
               {errors.BenefitsRate && <p className="text-sm">{errors.BenefitsRate}</p>}
+              <div className="input-hint info-button">i
+                <div className="tooltip"> The average US benefits rate for SDRs is near 30%</div>
+              </div>
             </div>
 
             {/* SDR Management Cost */}
-            <div>
-              <label htmlFor="SDRManagementCost" className="block text-sm">Cost to Manage SDR Resources:</label>
+            <div className="input-category">
+              <label htmlFor="SDRManagementCost" className="block justify-center text-sm">Cost to Manage SDR Resources:</label>
             </div>
+            
             <div>
               <input
                 type="number"
@@ -378,13 +390,14 @@ const Form = () => {
                 className={`input text-medium  ${errors.SDRManagementCost ? 'border-red-500' : 'border-gray-300'}`}
               />
               {errors.SDRManagementCost && <p className="text-sm">{errors.SDRManagementCost}</p>}
+              <div className="input-hint info-button">i
+                <div className="tooltip"> The average salary of one SDR manager is $137000</div>
+              </div>
             </div>
 
-            
-
             {/* SDRs Seeking To Hire */}
-            <div>
-              <label htmlFor="SDRsSeekingToHire" className="block text-sm">Number of SDRs Seeking To Hire:</label>
+            <div className="input-category">
+              <label htmlFor="SDRsSeekingToHire" className="block justify-center text-sm">Number of SDRs Seeking To Hire:</label>
             </div>
             <div>
               <input
@@ -396,8 +409,12 @@ const Form = () => {
                 className={`input text-medium  ${errors.SDRsSeekingToHire ? 'border-red-500' : 'border-gray-300'}`}
               />
               {errors.SDRsSeekingToHire && <p className="text-sm">{errors.SDRsSeekingToHire}</p>}
-            </div>
+              <div className="input-hint info-button">i
+                <div className="tooltip"> Lorem Ipsum</div>
+              </div>
+            </div>  
           </div>
+
           <div className="flex-column flex-center">
             <button type="button" onClick={handleReset} className="input-button text-medium">Reset Values</button>
             <button type="submit" className="input-button text-medium">Calculate Costs</button>
@@ -503,12 +520,6 @@ const Form = () => {
                     We find that the average cost for an SDR hire is {formatCurrency((fixedData.OnboardingAndTrainingCostPerSDR))} and multiplied it by the industry average turnover rate of {formatPercentage(fixedData.MonthlyTurnoverRate)}
                   </div>
                 </td>
-              </tr>
-              <tr>
-                <td className="text-medium justify-left">Legal and Compliance:</td>
-                <td className="text-medium justify-center">{formatCurrency(
-                  fixedData.LegalandCompliance
-                )}</td>
               </tr>
               <tr>
                 <td className="text-medium justify-left font-semisemibold">Total Indirect Cost:</td>
