@@ -33,22 +33,23 @@ const Form = () => {
 
   useEffect(() => {
     //console.log("fetching currency rates") // for debugging
-    fetch("https://api.exchangerate.host/latest?base=USD") // they need an API Key
+    fetch("https://api.frankfurter.dev/v1/latest?base=USD&symbols=EUR,GBP,JPY,AUD,CAD") // they need an API Key
       .then((res) => res.json())
       .then((data) => {
         //console.log("fetched currency rates")
         if (data.success === false) {
-          // hard code currency rates in case of failure
+          // hard code currency rates in case of failure. Rates as of May 1, 2025
           console.log("Error fetching data, using hardcoded rates");
           setCurrencyRates({
             USD: 1.0,
-            EUR: 0.85,
-            GBP: 0.75,
-            JPY: 110.0,
-            AUD: 1.35,
-            CAD: 1.25
+            EUR: 0.87928,
+            GBP: 0.74897,
+            JPY: 143.04,
+            AUD: 1.5649,
+            CAD: 1.3829
           });
         } else {
+          console.log("successfully fetched currency rates", data.rates)
           setCurrencyRates(data.rates);
         }
       })
